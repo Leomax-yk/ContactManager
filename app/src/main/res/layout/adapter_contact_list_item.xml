@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/relative_contact_list_item"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/image_call"
+        android:layout_width="@dimen/icon_size_big"
+        android:layout_height="@dimen/icon_size_big"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        android:layout_marginRight="@dimen/space"
+        android:padding="@dimen/half_space"
+        android:src="@drawable/ic_icon_call" />
+
+    <LinearLayout
+        android:id="@+id/linear_top"
+        android:layout_toRightOf="@+id/image_call"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="40"
+            android:padding="@dimen/half_space"
+            android:text="Name"
+            android:textColor="@color/colorNormal"
+            android:textSize="@dimen/text_normal_size"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/text_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="15"
+            android:padding="@dimen/half_space"
+            android:text="+91-9999999999"
+            android:textColor="@color/colorNormal"
+            android:textSize="@dimen/text_normal_size" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_below="@+id/linear_top"
+        android:background="@color/colorNormal" />
+
+</RelativeLayout>

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="jp.mcinc.imesh.type.ipphone">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <application
+        android:name="jp.mcinc.imesh.type.ipphone.AppController"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher_contact"
+        android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:roundIcon="@drawable/ic_launcher_contact"
+        android:supportsRtl="true"
+        android:theme="@style/NoTitle">
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.SplashScreen"
+            android:screenOrientation="locked">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.ContactListActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
+
+        </activity>
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.AddContactActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
+
+        </activity>
+
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.HistoryListActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
+
+        </activity>
+
+        <!-- [START fcm_listener] -->
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.PurchaseListActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
+
+        </activity>
+
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.PurchaseWaitingSplashActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
+
+        </activity>
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.PurchaseSuccessActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
+
+        </activity>
+
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.CancelConfirmActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
+
+        </activity>
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.CancelWaitingSplashScreen"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
+
+        </activity>
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.CancelSuccessfullActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
+
+        </activity>
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.CallContactActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
+
+        </activity>
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.EditContactActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
+
+        </activity>
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.DailScreenActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
+
+        </activity>
+
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.VoiceActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
+
+        </activity>
+
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.DeleteSplashActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
+
+        </activity>
+
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.ContactSavedActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
+
+        </activity>
+
+        <service android:name="com.twilio.client.TwilioClientService"
+            android:exported="false" android:stopWithTask="true"/>
+
+        <service
+            android:name="jp.mcinc.imesh.type.ipphone.notification.IncomingCallNotificationService"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="ACTION_ACCEPT" />
+                <action android:name="ACTION_REJECT" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="jp.mcinc.imesh.type.ipphone.fcm.VoiceFirebaseMessagingService"
+            android:stopWithTask="false">
+            <intent-filter>
+
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+    </application>
+
+
+</manifest>

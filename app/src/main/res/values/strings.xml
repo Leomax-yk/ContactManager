@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">IPPhone</string>
+    <string name="welcome_scren">Welcome\nto\nIPPhone</string>
+    <string name="enter_name">Name</string>
+    <string name="enter_number">Phone Number</string>
+    <string name="no_history_avaiable">No History Available</string>
+    <string name="no_contact_avaiable">No Contact Available</string>
+    <string name="turn_speaker_on">Speaker ON</string>
+    <string name="callee">client identity or phone number</string>
+    <string name="answer">Answer</string>
+    <string name="decline">Decline</string>
+    <string name="callHint">Dial a client name or phone number. Leaving the field empty results in an automated response.</string>
+    <string name="are_you_sure_to_delete">Are you sure to delete?</string>
+    <string name="purchase_waiting_message">We are in process of\napplying new phone number\nit will take few days\nfor approval. Please wait…</string>
+    <string name="cancel_waiting_message">We are in process of\ncancel phone number\nit will take few days for\ncancellation. Please wait…</string>
+    <string name="do_you_want_to_puchase_this_number">Do you want to puchase this number</string>
+    <string name="successfully_purchase_this_number">Successfully purchase \nthis number</string>
+    <string name="are_you_sure_to_cancel_this_number">Are you sure to cancel this number</string>
+    <string name="cancelled_sucessfully">\nCancelled Sucessfully</string>
+    <string name="save">SAVE</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="no_contacts">No Contacts</string>
+    <string name="add">Add</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="maintanance">Maintenance</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="contact_update_successfully">Contact updated successfully</string>
+    <string name="contact_saved_successfully">Contact saved successfully</string>
+    <string name="deleted_sucessfully">Deleted successfully</string>
+    <string name="select_phone_number_for_purchase">Select phone number for purchase</string>
+    <string name="no_number_available">NO NUMBER AVAILABLE</string>
+    <string name="cancel_this_phone_number">Cancel this Phone Number</string>
+</resources>

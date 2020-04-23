@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">IPPhone</string>
+    <string name="welcome_scren">IPPhone \n へようこそ</string>
+    <string name="enter_name">名前</string>
+    <string name="enter_number">電話番号</string>
+    <string name="no_history_avaiable">履歴はありません</string>
+    <string name="no_contact_avaiable">連絡先はありません</string>
+    <string name="turn_speaker_on">スピーカー</string>
+    <string name="callee">client identity or phone number</string>
+    <string name="answer">回答</string>
+    <string name="decline">低下</string>
+    <string name="callHint">Dial a client name or phone number. Leaving the field empty results in an automated response.</string>
+    <string name="are_you_sure_to_delete">削除してもよろしいですか？</string>
+    <string name="purchase_waiting_message">現在、電話番号の承認処理中です。承認には数日かかる場合がございます。</string>
+    <string name="cancel_waiting_message">電話番号は現在キャンセル中です。キャンセルには数日かかる場合があります。</string>
+    <string name="do_you_want_to_puchase_this_number">この番号を購入しますか</string>
+    <string name="successfully_purchase_this_number">この番号を購入しました</string>
+    <string name="are_you_sure_to_cancel_this_number">この番号をキャンセルしますか</string>
+    <string name="cancelled_sucessfully">\n 正常にキャンセルされました</string>
+    <string name="save">保存</string>
+    <string name="cancel">キャンセル</string>
+    <string name="ok">OK</string>
+    <string name="no_contacts">連絡先なし</string>
+    <string name="add">追加</string>
+    <string name="edit">編集</string>
+    <string name="delete">削除</string>
+    <string name="maintanance">メンテナンス</string>
+    <string name="yes">はい</string>
+    <string name="no">いいえ</string>
+    <string name="contact_update_successfully">連絡先を更新しました</string>
+    <string name="contact_saved_successfully">連絡先を保存しました</string>
+    <string name="deleted_sucessfully">正常に削除されました</string>
+    <string name="select_phone_number_for_purchase">購入する電話番号を選択</string>
+    <string name="no_number_available">利用可能な番号がありません</string>
+    <string name="cancel_this_phone_number">この電話番号をキャンセル</string>
+</resources>

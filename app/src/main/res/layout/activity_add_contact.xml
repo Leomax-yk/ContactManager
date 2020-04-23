@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_margin="@dimen/space"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="@dimen/icon_size_big"
+            android:layout_height="@dimen/icon_size_big"
+            android:layout_gravity="center_vertical"
+            android:background="@color/colorSave"
+            android:padding="@dimen/half_space"
+            android:src="@drawable/ic_contact_user_white" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/space"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="@dimen/icon_text"
+                    android:layout_height="@dimen/icon_text"
+                    android:layout_gravity="center_vertical"
+                    android:padding="@dimen/half_space"
+                    android:src="@drawable/ic_contact_user_green" />
+
+                    <EditText
+                        android:id="@+id/edit_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusedByDefault="true"
+                        android:hint="@string/enter_name"
+                        android:inputType="text"
+                        android:maxLength="30"
+                        android:nextFocusUp="@+id/linear_cancel"
+                        android:nextFocusDown="@+id/text_input_number"
+                        android:nextFocusForward="@+id/text_input_number"
+                        android:textColor="@color/colorNormal"
+                        android:textSize="@dimen/text_normal_mid_size" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="@dimen/icon_text"
+                    android:layout_height="@dimen/icon_text"
+                    android:layout_gravity="center_vertical"
+                    android:padding="@dimen/half_space"
+                    android:src="@drawable/ic_call_green" />
+
+                    <EditText
+                        android:id="@+id/edit_number"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/enter_number"
+                        android:inputType="phone"
+                        android:maxLength="10"
+                        android:nextFocusUp="@+id/text_input_name"
+                        android:nextFocusDown="@+id/linear_save"
+                        android:nextFocusForward="@+id/linear_save"
+                        android:textColor="@color/colorNormal"
+                        android:textSize="@dimen/text_normal_mid_size" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/linear_save"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:nextFocusUp="@+id/text_input_number"
+            android:nextFocusDown="@+id/linear_cancel"
+            android:nextFocusForward="@+id/linear_cancel"
+            android:background="@color/colorSave"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="@dimen/icon_text"
+                android:layout_height="@dimen/icon_text"
+                android:layout_centerVertical="true"
+                android:padding="@dimen/half_space"
+                android:src="@drawable/ic_save_white" />
+
+            <TextView
+                android:id="@+id/text_save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left|center_vertical"
+                android:padding="@dimen/half_space"
+                android:text="@string/save"
+                android:textColor="@color/colorWhite"
+                android:textAllCaps="true"
+                android:textSize="@dimen/text_normal_size"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:nextFocusUp="@+id/linear_save"
+            android:nextFocusDown="@+id/text_input_name"
+            android:nextFocusForward="@+id/text_input_name"
+            android:layout_weight="1"
+            android:background="@color/colorCancel"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="@dimen/icon_text"
+                android:layout_height="@dimen/icon_text"
+                android:layout_centerVertical="true"
+                android:padding="@dimen/half_space"
+                android:src="@drawable/ic_cancel_white" />
+
+            <TextView
+                android:id="@+id/text_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right|center_vertical"
+                android:maxLength="15"
+                android:padding="@dimen/half_space"
+                android:text="@string/cancel"
+                android:textAllCaps="true"
+                android:textColor="@color/colorWhite"
+                android:textSize="@dimen/text_normal_size"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

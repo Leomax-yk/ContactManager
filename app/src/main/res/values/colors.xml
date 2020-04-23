@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#494949</color>
+    <color name="colorPrimaryDark">#303030</color>
+    <color name="colorAccent">#009688</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorSelection">#CCCCCC</color>
+    <color name="colorBlack">#000000</color>
+    <color name="colorNormal">#464646</color>
+    <color name="colorNormalLight">#565656</color>
+    <color name="colorNormalDisable">#888888</color>
+    <color name="colorNormalDisableHalf">#BEBEBE</color>
+    <color name="colorGreen">#4CAF50</color>
+    <color name="colorDarkGreen">#3B8D3E</color>
+    <color name="colorSaveReject">#E93939</color>
+    <color name="colorSave">#2ECC71</color>
+    <color name="colorCancel">#474646</color>
+</resources>
