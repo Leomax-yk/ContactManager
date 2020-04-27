@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/enter_number"
             android:inputType="phone"
-            android:maxLength="10"
+            android:maxLength="15"
             android:textColor="@color/colorNormal"
             android:textSize="@dimen/text_normal_mid_size" />
 

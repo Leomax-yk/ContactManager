@@ -8,6 +8,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.twilio.voice.Call;
+
 import jp.mcinc.imesh.type.ipphone.R;
 import jp.mcinc.imesh.type.ipphone.util.Validation;
 //import com.twilio.Twilio;
@@ -29,7 +31,13 @@ public class DailScreenActivity extends AppCompatActivity {
         mButtonCall = findViewById(R.id.button_call);
         mEditNumber = findViewById(R.id.edit_number);
 
-        mEditNumber.setText(getIntent().getExtras().getString("num"));
+        mEditNumber.setText("" + getIntent().getExtras().getString("num"));
+        mEditNumber.post(new Runnable() {
+            @Override
+            public void run() {
+                mEditNumber.setSelection(mEditNumber.getText().length());
+            }
+        });
     }
 
     @Override
@@ -45,10 +53,7 @@ public class DailScreenActivity extends AppCompatActivity {
 
     private void isValidateAddContactToList() {
         if (Validation.validateString(mEditNumber.getText().toString()) && Validation.isMobileNumberValid(mEditNumber.getText().toString())) {
-            Intent i = new Intent(DailScreenActivity.this, VoiceActivity.class);
-            i.putExtra("dailNumber", "" + mEditNumber.getText().toString());
-            startActivity(i);
-            finish();
+
         } else {
             Toast.makeText(getApplicationContext(), "Enter mobile number properly", Toast.LENGTH_SHORT).show();
         }

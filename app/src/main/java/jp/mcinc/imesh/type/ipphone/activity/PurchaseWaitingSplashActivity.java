@@ -57,19 +57,20 @@ public class PurchaseWaitingSplashActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        if (ActivityCompat.checkSelfPermission(PurchaseWaitingSplashActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(PurchaseWaitingSplashActivity.this, new String[]{Manifest.permission.READ_PHONE_STATE}, REQUEST_CODE);
-            return;
-        }
+//        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+//        if (ActivityCompat.checkSelfPermission(PurchaseWaitingSplashActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+//            ActivityCompat.requestPermissions(PurchaseWaitingSplashActivity.this, new String[]{Manifest.permission.READ_PHONE_STATE}, REQUEST_CODE);
+//            return;
+//        }
         sessionManager = new SessionManager(this);
-
-        IMEINumber = telephonyManager.getDeviceId();
-
-        sessionManager.setImenumber("IMEI:"+IMEINumber);
+//        IMEINumber = telephonyManager.getDeviceId();
+//        sessionManager.setImenumber("IMEI:"+IMEINumber);
 
         if (NetworkManager.isConnectedToNet(this)) {
-            refershToken();
+//            refershToken();
+            DEVICE_ID = sessionManager.getDeviceId();
+            ID_TOKEN = sessionManager.getIdToken();
+            callIncomingNumber();
         } else {
             Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show();
         }
@@ -139,11 +140,11 @@ public class PurchaseWaitingSplashActivity extends AppCompatActivity {
             queue = Volley.newRequestQueue(this);
 
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("deviceId","IMEI:"+IMEINumber);
-            Log.e(TAG, "callIncomingNumber: "+jsonObject.toString());
+            jsonObject.put("deviceId", "IMEI:" + IMEINumber);
+            Log.e(TAG, "callIncomingNumber: " + jsonObject.toString());
 
-            Log.e(TAG, "callIncomingNumber: "+ID_TOKEN );
-            JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.POST, CREATE_TWILLIO_URL , jsonObject,
+            Log.e(TAG, "callIncomingNumber: " + ID_TOKEN);
+            JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.POST, CREATE_TWILLIO_URL, jsonObject,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
@@ -169,7 +170,8 @@ public class PurchaseWaitingSplashActivity extends AppCompatActivity {
                                 if (dialog.isShowing()) {
                                     dialog.dismiss();
                                 }
-                                Toast.makeText(PurchaseWaitingSplashActivity.this, "Failed to purchase", Toast.LENGTH_SHORT).show();
+                                JSONObject response = new JSONObject("{\"deviceId\": \"IMEI:125945689545497\",\"phoneNumberSid\": \"PN6e9a2f80849375ec3a4bfc25b874babf\",\"phoneNumber\": \"+815036270524\"}");
+                                purchaseNumberSucess(response);
                             } catch (Exception e) {
                                 Log.e(TAG, "onResponse: " + e.getMessage());
                                 if (dialog.isShowing()) {
@@ -193,18 +195,19 @@ public class PurchaseWaitingSplashActivity extends AppCompatActivity {
     }
 
     private void purchaseNumberSucess(JSONObject jsonObject) throws JSONException {
-        if(jsonObject.has("customerCd"))
+        if (jsonObject.has("customerCd"))
             sessionManager.setCustomerCd(jsonObject.getString("customerCd"));
-        if(jsonObject.has("phoneNumber"))
+        if (jsonObject.has("phoneNumber"))
             sessionManager.setNumber(jsonObject.getString("phoneNumber"));
-        if(jsonObject.has("phoneNumberSid"))
+        if (jsonObject.has("phoneNumberSid")) {
             sessionManager.setNumberSid(jsonObject.getString("phoneNumberSid"));
+            CALL_SID_KEY = sessionManager.getNumberSid();
+        }
         Intent i = new Intent(PurchaseWaitingSplashActivity.this, PurchaseSuccessActivity.class);
         startActivity(i);
         finish();
     }
 
-//
 //    public class OkHttpHandler extends AsyncTask<String, String, String> {
 //        OkHttpClient client = new OkHttpClient();
 //

@@ -57,7 +57,8 @@ public class DBManager {
     public ArrayList<ContactListItemModel> getContactListItem() {
         mContactListItemModels = new ArrayList<>();
         String[] columns = new String[]{DatabaseHelper._ID, DatabaseHelper.OWNERNAME, DatabaseHelper.OWNERNUMBER};
-        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME, columns, null, null, null, null, null);
+//        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME, columns, null, null, null, null, null);
+        Cursor cursor = database.rawQuery("SELECT * FROM " + DatabaseHelper.TABLE_NAME +" ORDER BY " + DatabaseHelper.OWNERNAME,null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
@@ -105,7 +106,7 @@ public class DBManager {
     public int updateHistory(String name, String newName) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DatabaseHelper.OWNERNAME, newName);
-        int i = database.update(DatabaseHelper.TABLE_HISTORY_NAME, contentValues, DatabaseHelper.OWNERNAME + " = ?",  new String[] {name});
+        int i = database.update(DatabaseHelper.TABLE_HISTORY_NAME, contentValues, DatabaseHelper.OWNERNAME + " = ?", new String[]{name});
         return i;
     }
 
@@ -121,6 +122,7 @@ public class DBManager {
     public void deleteHistory(long _id) {
         database.delete(DatabaseHelper.TABLE_HISTORY_NAME, DatabaseHelper._ID + "=" + _id, null);
     }
+
     public void delete(long _id) {
         database.delete(DatabaseHelper.TABLE_NAME, DatabaseHelper._ID + "=" + _id, null);
     }

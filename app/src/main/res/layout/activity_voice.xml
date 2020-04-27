@@ -69,5 +69,45 @@
             android:layout_marginEnd="@dimen/padding"
             android:visibility="invisible" />
     </LinearLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/relative_dail"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:id="@+id/button_call"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="2dp"
+            android:background="@color/colorGreen"
+            android:focusable="false"
+            android:text="CALL"
+            android:textColor="@color/colorWhite" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="@dimen/space"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/edit_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/enter_number"
+                android:inputType="phone"
+                android:maxLength="15"
+                android:nextFocusDown="@+id/linear_save"
+                android:nextFocusForward="@+id/linear_save"
+                android:nextFocusUp="@+id/text_input_name"
+                android:textColor="@color/colorNormal"
+                android:textSize="@dimen/text_normal_mid_size" />
+        </LinearLayout>
+
+    </RelativeLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

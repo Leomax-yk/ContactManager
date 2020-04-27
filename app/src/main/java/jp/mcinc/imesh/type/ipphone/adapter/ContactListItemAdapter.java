@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import jp.mcinc.imesh.type.ipphone.activity.ContactListActivity;
 import jp.mcinc.imesh.type.ipphone.model.ContactListItemModel;
 
 import jp.mcinc.imesh.type.ipphone.R;
@@ -24,8 +25,9 @@ public class ContactListItemAdapter extends RecyclerView.Adapter<ContactListItem
     public String TAG = getClass().getSimpleName();
     private Context context;
     private List<ContactListItemModel> mContactListItemModels;
-    private int pos = 0;//LoadClassData.GP();
+    private int pos = 0;
     private DBManager dbManager;
+    private ContactListActivity.RecyclerViewClickListener mListener;
 
     public int getPos() {
         return pos;
@@ -35,9 +37,10 @@ public class ContactListItemAdapter extends RecyclerView.Adapter<ContactListItem
         this.pos = pos;
     }
 
-    public ContactListItemAdapter(Context context, List<ContactListItemModel> contactListItemModels) {
+    public ContactListItemAdapter(Context context, List<ContactListItemModel> contactListItemModels, ContactListActivity.RecyclerViewClickListener listener) {
         this.context = context;
         this.mContactListItemModels = contactListItemModels;
+        this.mListener = listener;
         dbManager = new DBManager(context);
         dbManager.open();
     }
@@ -85,17 +88,8 @@ public class ContactListItemAdapter extends RecyclerView.Adapter<ContactListItem
         public void onClick(View view) {
             pos = getAdapterPosition();
             if (pos != -1) {
-                makeCall();
+                mListener.onClick(view, getAdapterPosition());
             }
-        }
-    }
-
-    private void makeCall() {
-        if (mContactListItemModels != null && mContactListItemModels.size() > 0) {
-            Date date = new Date();
-            Log.e(TAG, "makeCall: " + DateFormat.getDateInstance(DateFormat.MEDIUM).format(date));
-            Log.e(TAG, "makeCall: " + DateFormat.getTimeInstance().format(date));
-            dbManager.insertHistory(3, mContactListItemModels.get(pos).getOwnerName(), mContactListItemModels.get(pos).getOwnerNumber(), "" + DateFormat.getDateInstance(DateFormat.MEDIUM).format(date), "" + DateFormat.getTimeInstance().format(date));
         }
     }
 }

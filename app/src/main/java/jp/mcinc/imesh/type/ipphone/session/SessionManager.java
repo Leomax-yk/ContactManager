@@ -18,7 +18,12 @@ public class SessionManager {
     public static final String KEY_NUMBER_SID = "KEY_NUMBER_SID";
     public static final String KEY_PURCHASE_RESPONSE = "KEY_PURCHASE_RESPONSE";
     public static final String KEY_IMENUMBER = "KEY_IMENUMBER";
-
+    public static final String KEY_DEVICE_ID = "KEY_DEVICE_ID";
+    public static final String KEY_REFRESH_TOKEN = "KEY_REFRESH_TOKEN";
+    public static final String KEY_ID_TOKEN = "KEY_ID_TOKEN";
+    public static final String KEY_CALL_START = "KEY_CALL_START";
+    public static final String KEY_CALL_IMESH_START = "KEY_CALL_IMESH_START";
+    public static final String KEY_OPEN = "KEY_OPEN";
     public SessionManager(Context context) {
         this._context = context;
         prefGpsOdo = _context.getSharedPreferences(KEY_CONTACT, PRIVATE_MODE);
@@ -98,6 +103,63 @@ public class SessionManager {
 
     public String getImenumber(){
         return prefGpsOdo.getString(KEY_IMENUMBER,"");
+    }
+
+
+    public void setDeviceId(String deviceId) {
+        editorGpsOdo.putString(KEY_DEVICE_ID, deviceId);
+        editorGpsOdo.apply();
+    }
+
+    public String getDeviceId(){
+        return prefGpsOdo.getString(KEY_DEVICE_ID,"");
+    }
+
+
+    public void setRefreshToken(String refreshToken) {
+        editorGpsOdo.putString(KEY_REFRESH_TOKEN, refreshToken);
+        editorGpsOdo.apply();
+    }
+
+    public String getRefreshToken(){
+        return prefGpsOdo.getString(KEY_REFRESH_TOKEN,"");
+    }
+
+
+    public void setIdToken(String idToken) {
+        editorGpsOdo.putString(KEY_ID_TOKEN, idToken);
+        editorGpsOdo.apply();
+    }
+
+    public String getIdToken(){
+        return prefGpsOdo.getString(KEY_ID_TOKEN,"");
+    }
+
+    public boolean isCallStart(){
+        return prefGpsOdo.getBoolean(KEY_CALL_START,false);
+    }
+
+    public void setCallStart(boolean callStart) {
+        editorGpsOdo.putBoolean(KEY_CALL_START, callStart);
+        editorGpsOdo.apply();
+    }
+
+    public boolean isCallImeshStart(){
+        return prefGpsOdo.getBoolean(KEY_CALL_START,false);
+    }
+
+    public void setCallImeshStart(boolean callStart) {
+        editorGpsOdo.putBoolean(KEY_CALL_START, callStart);
+        editorGpsOdo.apply();
+    }
+
+    public void setOpen(boolean open) {
+        editorGpsOdo.putBoolean(KEY_OPEN, open);
+        editorGpsOdo.apply();
+    }
+
+    public boolean isOpen(){
+        return prefGpsOdo.getBoolean(KEY_OPEN,false);
     }
 
 

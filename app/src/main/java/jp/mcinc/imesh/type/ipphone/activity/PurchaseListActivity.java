@@ -71,7 +71,7 @@ public class PurchaseListActivity extends AppCompatActivity {
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        callAvailableNumberApi();
+        //callAvailableNumberApi();
         //new GetAvailablePhoneNumber().execute();
     }
 
@@ -97,7 +97,7 @@ public class PurchaseListActivity extends AppCompatActivity {
         mTextNoData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                callAvailableNumberApi();
+                //callAvailableNumberApi();
             }
         });
 
@@ -131,76 +131,76 @@ public class PurchaseListActivity extends AppCompatActivity {
         }
     }
 
-    private void callAvailableNumberApi() {
-        try {
-            if (NetworkManager.isConnectedToNet(this)) {
-                dialog = new ProgressDialog(this);
-                dialog.setMessage("Please wait...");
-                dialog.setCancelable(false);
-                dialog.show();
-
-                queue = Volley.newRequestQueue(this);
-                JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, AVAILABLE_JP_LOCAL_VOICE, null,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                try {
-                                    Log.e(TAG, "onResponse: " + response.toString());
-                                    Available available = PurchaseController.fromJsonString(response.toString());
-                                    mPurchaseListItemModels = new ArrayList<>();
-                                    if (available != null && available.getAvailablePhoneNumbers() != null && available.getAvailablePhoneNumbers().length > 0) {
-                                        for (int i = 0; i < available.getAvailablePhoneNumbers().length; i++) {
-                                            PurchaseListItemModel purchaseListItemModel = new PurchaseListItemModel();
-                                            purchaseListItemModel.setId(i);
-                                            purchaseListItemModel.setCheck(false);
-                                            purchaseListItemModel.setOwnerNumber("" + available.getAvailablePhoneNumbers()[i].getPhoneNumber());
-                                            mPurchaseListItemModels.add(purchaseListItemModel);
-                                        }
-                                    }
-                                    if (mPurchaseListItemModels != null && mPurchaseListItemModels.size() > 0) {
-                                        mPurchaseListItemModels.get(0).setCheck(true);
-                                        setAdapterList();
-                                    } else {
-                                        // No contact available in DATABASE
-                                        mRecyclerView.setVisibility(View.GONE);
-                                        mTextNoData.setVisibility(View.VISIBLE);
-                                        //dummyData();
-                                    }
-                                    if (dialog.isShowing()) {
-                                        dialog.dismiss();
-                                    }
-                                } catch (Exception e) {
-                                    Log.e(TAG, "onResponse: " + e.getMessage());
-                                    if (dialog.isShowing()) {
-                                        dialog.dismiss();
-                                    }
-                                }
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                if (dialog.isShowing()) {
-                                    dialog.dismiss();
-                                }
-                            }
-                        }) {
-                    @Override
-                    public Map<String, String> getHeaders() {
-                        HashMap<String, String> params = new HashMap<String, String>();
-                        String credentials = Credentials.basic(ACCOUNT_SID, AUTH_TOKEN);
-                        params.put("Authorization", credentials);
-                        return params;
-                    }
-                };
-                queue.add(getRequest);
-            } else {
-                Toast.makeText(this, "No Internet", Toast.LENGTH_SHORT).show();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "onResponse: " + e.getMessage());
-        }
-    }
+//    private void callAvailableNumberApi() {
+//        try {
+//            if (NetworkManager.isConnectedToNet(this)) {
+//                dialog = new ProgressDialog(this);
+//                dialog.setMessage("Please wait...");
+//                dialog.setCancelable(false);
+//                dialog.show();
+//
+//                queue = Volley.newRequestQueue(this);
+//                JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, AVAILABLE_JP_LOCAL_VOICE, null,
+//                        new Response.Listener<JSONObject>() {
+//                            @Override
+//                            public void onResponse(JSONObject response) {
+//                                try {
+//                                    Log.e(TAG, "onResponse: " + response.toString());
+//                                    Available available = PurchaseController.fromJsonString(response.toString());
+//                                    mPurchaseListItemModels = new ArrayList<>();
+//                                    if (available != null && available.getAvailablePhoneNumbers() != null && available.getAvailablePhoneNumbers().length > 0) {
+//                                        for (int i = 0; i < available.getAvailablePhoneNumbers().length; i++) {
+//                                            PurchaseListItemModel purchaseListItemModel = new PurchaseListItemModel();
+//                                            purchaseListItemModel.setId(i);
+//                                            purchaseListItemModel.setCheck(false);
+//                                            purchaseListItemModel.setOwnerNumber("" + available.getAvailablePhoneNumbers()[i].getPhoneNumber());
+//                                            mPurchaseListItemModels.add(purchaseListItemModel);
+//                                        }
+//                                    }
+//                                    if (mPurchaseListItemModels != null && mPurchaseListItemModels.size() > 0) {
+//                                        mPurchaseListItemModels.get(0).setCheck(true);
+//                                        setAdapterList();
+//                                    } else {
+//                                        // No contact available in DATABASE
+//                                        mRecyclerView.setVisibility(View.GONE);
+//                                        mTextNoData.setVisibility(View.VISIBLE);
+//                                        //dummyData();
+//                                    }
+//                                    if (dialog.isShowing()) {
+//                                        dialog.dismiss();
+//                                    }
+//                                } catch (Exception e) {
+//                                    Log.e(TAG, "onResponse: " + e.getMessage());
+//                                    if (dialog.isShowing()) {
+//                                        dialog.dismiss();
+//                                    }
+//                                }
+//                            }
+//                        },
+//                        new Response.ErrorListener() {
+//                            @Override
+//                            public void onErrorResponse(VolleyError error) {
+//                                if (dialog.isShowing()) {
+//                                    dialog.dismiss();
+//                                }
+//                            }
+//                        }) {
+//                    @Override
+//                    public Map<String, String> getHeaders() {
+//                        HashMap<String, String> params = new HashMap<String, String>();
+//                        String credentials = Credentials.basic(ACCOUNT_SID, AUTH_TOKEN);
+//                        params.put("Authorization", credentials);
+//                        return params;
+//                    }
+//                };
+//                queue.add(getRequest);
+//            } else {
+//                Toast.makeText(this, "No Internet", Toast.LENGTH_SHORT).show();
+//            }
+//        } catch (Exception e) {
+//            Log.e(TAG, "onResponse: " + e.getMessage());
+//        }
+//    }
 
     private void saveNumber(PurchaseListItemModel purchaseListItemModel) {
         if (saveSelection == 0) {
@@ -283,7 +283,7 @@ public class PurchaseListActivity extends AppCompatActivity {
                     if (mPurchaseListItemModels != null && mPurchaseListItemModels.size() > 0) {
                         showSaveMenu();
                     }else {
-                        callAvailableNumberApi();
+                       // callAvailableNumberApi();
                     }
                 }
                 return true;

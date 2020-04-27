@@ -15,15 +15,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import jp.mcinc.imesh.type.ipphone.R;
+import jp.mcinc.imesh.type.ipphone.activity.HistoryListActivity;
 import jp.mcinc.imesh.type.ipphone.model.HistroyListItemModel;
 
 import java.util.List;
 
-public class HistoryListItemAdapter  extends RecyclerView.Adapter<HistoryListItemAdapter.HistoryListItemHolder> {
+public class HistoryListItemAdapter extends RecyclerView.Adapter<HistoryListItemAdapter.HistoryListItemHolder> {
     public String TAG = getClass().getSimpleName();
     private Context context;
     private List<HistroyListItemModel> mHistroyListItemModels;
     private int pos = 0;//LoadClassData.GP();
+    private HistoryListActivity.RecyclerViewClickListener mListener;
 
     public int getPos() {
         return pos;
@@ -32,7 +34,9 @@ public class HistoryListItemAdapter  extends RecyclerView.Adapter<HistoryListIte
     public void setPos(int pos) {
         this.pos = pos;
     }
-    public HistoryListItemAdapter(Context context, List<HistroyListItemModel> histroyListItemModel) {
+
+    public HistoryListItemAdapter(Context context, List<HistroyListItemModel> histroyListItemModel, HistoryListActivity.RecyclerViewClickListener mListener) {
+        this.mListener = mListener;
         this.context = context;
         this.mHistroyListItemModels = histroyListItemModel;
     }
@@ -57,11 +61,11 @@ public class HistoryListItemAdapter  extends RecyclerView.Adapter<HistoryListIte
             holder.textItemNumber.setText("" + mHistroyListItemModels.get(position).getOwnerNumber());
             holder.textItemDate.setText("" + mHistroyListItemModels.get(position).getContactDate());
             holder.textItemTime.setText("" + mHistroyListItemModels.get(position).getContactTime());
-            if(mHistroyListItemModels.get(position).getCallerType()==1)
+            if (mHistroyListItemModels.get(position).getCallerType() == 1)
                 holder.imageCall.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_history_missed_call));
-            else if(mHistroyListItemModels.get(position).getCallerType()==2)
+            else if (mHistroyListItemModels.get(position).getCallerType() == 2)
                 holder.imageCall.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_history_incoming));
-            else if(mHistroyListItemModels.get(position).getCallerType()==3)
+            else if (mHistroyListItemModels.get(position).getCallerType() == 3)
                 holder.imageCall.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_history_outgoing));
             if (mHistroyListItemModels.get(position).isCheck())
                 holder.relativeContactListItem.setBackgroundColor(Color.parseColor("#CCCCCC"));
@@ -73,7 +77,7 @@ public class HistoryListItemAdapter  extends RecyclerView.Adapter<HistoryListIte
     }
 
     protected class HistoryListItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView textItemName, textItemNumber,textItemDate,textItemTime;
+        TextView textItemName, textItemNumber, textItemDate, textItemTime;
         ImageView imageCall;
         RelativeLayout relativeContactListItem;
 
@@ -92,7 +96,7 @@ public class HistoryListItemAdapter  extends RecyclerView.Adapter<HistoryListIte
         public void onClick(View view) {
             pos = getAdapterPosition();
             if (pos != -1) {
-                Toast.makeText(context, "CALL", Toast.LENGTH_SHORT).show();
+                mListener.onClick(view, getAdapterPosition());
             }
         }
     }

@@ -11,10 +11,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -41,11 +43,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ProcessLifecycleOwner;
+import androidx.loader.content.CursorLoader;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import jp.mcinc.imesh.type.ipphone.BuildConfig;
 import jp.mcinc.imesh.type.ipphone.adapter.ContactListItemAdapter;
+import jp.mcinc.imesh.type.ipphone.broadcast.BootCompleteBroadCast;
 import jp.mcinc.imesh.type.ipphone.contants.Constants;
 import jp.mcinc.imesh.type.ipphone.controller.SoundPoolManager;
 import jp.mcinc.imesh.type.ipphone.model.ContactListItemModel;
@@ -61,6 +65,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.Gson;
+import com.twilio.jwt.accesstoken.AccessToken;
+import com.twilio.twiml.VoiceResponse;
+import com.twilio.twiml.voice.Dial;
+import com.twilio.twiml.voice.Say;
 import com.twilio.voice.Call;
 import com.twilio.voice.CallException;
 import com.twilio.voice.CallInvite;
@@ -78,6 +86,7 @@ import jp.mcinc.imesh.type.ipphone.notification.IncomingCallNotificationService;
 import jp.mcinc.imesh.type.ipphone.session.SessionManager;
 import jp.mcinc.imesh.type.ipphone.util.NetworkManager;
 
+import java.net.URI;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -85,12 +94,14 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import static jp.mcinc.imesh.type.ipphone.contants.Constants.CALL_SID_KEY;
 import static jp.mcinc.imesh.type.ipphone.contants.Constants.GET_ACCESS_TOKEN_URL;
 import static jp.mcinc.imesh.type.ipphone.contants.Constants.ID_TOKEN;
 
 public class ContactListActivity extends AppCompatActivity {
     private String TAG = getClass().getSimpleName();
     private DBManager dbManager;
+    private SessionManager sessionManager;
     private RecyclerView mRecyclerView;
     private TextView mTextNoData, mTextAdd, mTextEdit, mTextDelete, mTextMaintanance, mTextYes, mTextNo;
     private Button mButtonCall, mButtonHistory, mButtonBack;
@@ -98,19 +109,14 @@ public class ContactListActivity extends AppCompatActivity {
     private ContactListItemAdapter mContactListItemAdapter;
     private LinearLayout mLinearMenu, mLinearDelete;
     private ImageView mImageMenu, mImageDail;
-    private int menuSelection = 0, deleteSelection = 0;
-    private boolean deleteVisible = false, menuVisible = false;
-    private int pos = 0;
-    private String accessToken = "";
-    private AudioManager audioManager;
+    private int menuSelection = 0, deleteSelection = 0, pos = 0;
     private int savedAudioMode = AudioManager.MODE_INVALID;
-
-    private boolean isReceiverRegistered = false;
+    private boolean deleteVisible = false, menuVisible = false, isReceiverRegistered = false;
+    private AudioManager audioManager;
     private VoiceBroadcastReceiver voiceBroadcastReceiver;
 
     // Empty HashMap, never populated for the Quickstart
-    HashMap<String, String> params = new HashMap<>();
-
+    private HashMap<String, String> params = new HashMap<>();
     private CoordinatorLayout coordinatorLayout;
     private FloatingActionButton callActionFab;
     private FloatingActionButton hangupActionFab;
@@ -122,23 +128,27 @@ public class ContactListActivity extends AppCompatActivity {
     private AlertDialog alertDialog;
     private CallInvite activeCallInvite;
     private Call activeCall;
+    private Call.Listener callListener = callListener();
     private int activeCallNotificationId;
 
-    private SessionManager sessionManager;
-
     RegistrationListener registrationListener = registrationListener();
-    Call.Listener callListener = callListener();
     private String mAccessToken;
     private ProgressDialog dialog;
     private RequestQueue queue;
 
     private static final int MIC_PERMISSION_REQUEST_CODE = 1;
+    private RecyclerViewClickListener recyclerViewClickListener;
+
+    public interface RecyclerViewClickListener {
+        void onClick(View view, int position);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact_list);
         getSupportActionBar().hide();
+        sessionManager = new SessionManager(this);
 
         mRecyclerView = findViewById(R.id.recycler_view_contact);
         mLinearMenu = findViewById(R.id.linear_menu);
@@ -172,6 +182,7 @@ public class ContactListActivity extends AppCompatActivity {
         mButtonBack.setPadding(dpi, 0, 0, 0);
         dbManager = new DBManager(this);
         dbManager.open();
+
         GetAccessToken();
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -326,6 +337,7 @@ public class ContactListActivity extends AppCompatActivity {
      * The UI state when there is an active call
      */
     private void setCallUI() {
+        Constants.sendCallStartBroadcast(getApplicationContext());
 //        callActionFab.hide();
 //        hangupActionFab.show();
 //        holdActionFab.show();
@@ -454,20 +466,33 @@ public class ContactListActivity extends AppCompatActivity {
         };
     }
 
-    private void makePhoneCall(){
-        params.put("to", "+817021908616");
-        ConnectOptions connectOptions = new ConnectOptions.Builder(accessToken)
-                .params(params)
-                .build();
-        activeCall = Voice.connect(ContactListActivity.this, connectOptions, callListener);
-        setCallUI();
+    private void makePhoneCall() {
+        if(!sessionManager.isCallImeshStart()) {
+            params.put("to", "+817021908616");
+            ConnectOptions connectOptions = new ConnectOptions.Builder(mAccessToken)
+                    .params(params)
+                    .build();
+            activeCall = Voice.connect(ContactListActivity.this, connectOptions, callListener);
+            setCallUI();
+            sessionManager.setCallStart(true);
+        }
+    }
+
+    private void makeEndCall(){
+        if(sessionManager.isCallStart()){
+            SoundPoolManager.getInstance(ContactListActivity.this).playDisconnect();
+            resetUI();
+            disconnect();
+            Constants.sendCallEndBroadcast(getApplicationContext());
+            makeCall("END CALL");
+        }
     }
     private DialogInterface.OnClickListener callClickListener() {
         return (dialog, which) -> {
             // Place a call
             EditText contact = ((AlertDialog) dialog).findViewById(R.id.contact);
             params.put("to", "+817021908616");
-            ConnectOptions connectOptions = new ConnectOptions.Builder(accessToken)
+            ConnectOptions connectOptions = new ConnectOptions.Builder(mAccessToken)
                     .params(params)
                     .build();
             activeCall = Voice.connect(ContactListActivity.this, connectOptions, callListener);
@@ -696,7 +721,7 @@ public class ContactListActivity extends AppCompatActivity {
                 .isAtLeast(Lifecycle.State.STARTED);
     }
 
-    private void GetAccessToken(){
+    private void GetAccessToken() {
         if (NetworkManager.isConnectedToNet(this)) {
             try {
                 dialog = new ProgressDialog(this);
@@ -705,13 +730,13 @@ public class ContactListActivity extends AppCompatActivity {
                 dialog.show();
                 queue = Volley.newRequestQueue(this);
 
-                JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, GET_ACCESS_TOKEN_URL + sessionManager.getImenumber() , null,
+                JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, GET_ACCESS_TOKEN_URL + sessionManager.getDeviceId(), null,
                         new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response) {
                                 try {
                                     Log.e(TAG, "onResponse: " + response.toString());
-                                    accessToken = response.toString();
+                                    mAccessToken = response.toString();
                                     if (dialog.isShowing()) {
                                         dialog.dismiss();
                                     }
@@ -730,7 +755,9 @@ public class ContactListActivity extends AppCompatActivity {
                                 if (dialog.isShowing()) {
                                     dialog.dismiss();
                                 }
-                                Toast.makeText(ContactListActivity.this, "Failed to get Access token", Toast.LENGTH_SHORT).show();
+                                mAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJpc3MiOiJTS2RiZmZiZjU3NjBmODNjZTQ4MmM2ZmUyMzlkZDQxYzBmIiwiZXhwIjoxNTg3NzE2MzczLCJqdGkiOiJTS2RiZmZiZjU3NjBmODNjZTQ4MmM2ZmUyMzlkZDQxYzBmLTE1ODc3MTI3NzMiLCJzdWIiOiJBQ2E3OGFjMjRmNjM4N2QxZjIwOGY2OWYyOGI2ZDg0YzgyIiwiZ3JhbnRzIjp7ImlkZW50aXR5IjoiSU1FSToxMjU5NDU2ODk1NDU0OTciLCJ2b2ljZSI6eyJpbmNvbWluZyI6eyJhbGxvdyI6dHJ1ZX0sIm91dGdvaW5nIjp7ImFwcGxpY2F0aW9uX3NpZCI6IkFQNDM4ODRkODBhNDVmNGVkODA2YjI3YTlhNWJhMWE4OWMifX19fQ.dXp2tbnLXqTH5yvhTiwFKWIE0QkL8niTrwY-RDH-eqY";
+                                registerForCallInvites();
+                                Log.e(TAG, "onErrorResponse: to get access token ");
                             }
                         }) {
                     @Override
@@ -752,6 +779,12 @@ public class ContactListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        recyclerViewClickListener = (view, position) -> {
+            pos = position;
+            makeCall("CALL");
+        };
+        CALL_SID_KEY = sessionManager.getNumberSid();
+
         if (mLinearMenu.getVisibility() != View.VISIBLE) {
             menuVisible = false;
             menuSelection = 0;
@@ -761,7 +794,7 @@ public class ContactListActivity extends AppCompatActivity {
         // Getting list of contact from the DATABASE
         mContactListItemModel = dbManager.getContactListItem();
         if (mContactListItemModel != null && mContactListItemModel.size() > 0) {
-            mContactListItemAdapter = new ContactListItemAdapter(this, mContactListItemModel);
+            mContactListItemAdapter = new ContactListItemAdapter(this, mContactListItemModel, recyclerViewClickListener);
             mRecyclerView.setAdapter(mContactListItemAdapter);
             mContactListItemAdapter.notifyDataSetChanged();
             mRecyclerView.setVisibility(View.VISIBLE);
@@ -856,56 +889,7 @@ public class ContactListActivity extends AppCompatActivity {
         });
     }
 
-    private void connect(String contact, boolean isPhoneNumber) {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("To", contact);
-
-//        if (clientDevice != null) {
-//            // Create an outgoing connection
-//            connection = clientDevice.connect(params, this);
-//            setCallUI();
-//        } else {
-//            Toast.makeText(ClientActivity.this, "No existing device", Toast.LENGTH_SHORT).show();
-//        }
-    }
-
-
-    class doCall extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... voids) {
-            isValidateAddContactToList();
-            return null;
-        }
-    }
-
-    private void isValidateAddContactToList() {
-        try {
-//            Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
-//            Call call = Call.creator(
-//                    new com.twilio.type.PhoneNumber("+817021908616"),
-//                    new com.twilio.type.PhoneNumber("+12407165698"),
-//                    URI.create("http://demo.twilio.com/docs/voice.xml"))
-//                    .create();
-
-//            Dial dial = new Dial.Builder("+817021908616").build();
-//            Say say = new Say.Builder("Goodbye").build();
-//            VoiceResponse response = new VoiceResponse.Builder().dial(dial)
-//                    .say(say).build();
-//
-//            try {
-//                System.out.println(response.toXml());
-//            } catch (TwiMLException e) {
-//                e.printStackTrace();
-//            }
-
-
-        }catch (Exception e){
-
-        }
-    }
-
-
-    private void makeCall(String str) {
+    public void makeCall(String str) {
         if (str.equalsIgnoreCase("CALL")) {
             if (mContactListItemModel != null && mContactListItemModel.size() > 0) {
                 Date date = new Date();
@@ -913,9 +897,10 @@ public class ContactListActivity extends AppCompatActivity {
                 Log.e(TAG, "makeCall: " + DateFormat.getTimeInstance().format(date));
                 dbManager.insertHistory(3, mContactListItemModel.get(pos).getOwnerName(), mContactListItemModel.get(pos).getOwnerNumber(), "" + DateFormat.getDateInstance(DateFormat.MEDIUM).format(date), "" + DateFormat.getTimeInstance().format(date));
                 makePhoneCall();
-            } else
+            } else {
                 Toast.makeText(getApplicationContext(), "Add Contact to CALL", Toast.LENGTH_SHORT).show();
-
+                callDailPad(0);
+            }
         } else
             Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
     }
@@ -939,12 +924,15 @@ public class ContactListActivity extends AppCompatActivity {
         mTextAdd.setBackgroundColor(Color.parseColor("#FFFFFF"));
         mTextEdit.setBackgroundColor(Color.parseColor("#FFFFFF"));
         mTextDelete.setBackgroundColor(Color.parseColor("#FFFFFF"));
+        mTextMaintanance.setBackgroundColor(Color.parseColor("#FFFFFF"));
         if (menuSelection == 0) {
             mTextAdd.setBackgroundColor(Color.parseColor("#CCCCCC"));
         } else if (menuSelection == 1) {
             mTextEdit.setBackgroundColor(Color.parseColor("#CCCCCC"));
         } else if (menuSelection == 2) {
             mTextDelete.setBackgroundColor(Color.parseColor("#CCCCCC"));
+        } else if (menuSelection == 3) {
+            mTextMaintanance.setBackgroundColor(Color.parseColor("#CCCCCC"));
         }
     }
 
@@ -1043,7 +1031,7 @@ public class ContactListActivity extends AppCompatActivity {
                             mContactListItemAdapter.setPos((pos + 1));
                             mContactListItemModel.get(pos).setCheck(true);
                         }
-                        mContactListItemAdapter = new ContactListItemAdapter(this, mContactListItemModel);
+                        mContactListItemAdapter = new ContactListItemAdapter(this, mContactListItemModel, recyclerViewClickListener);
                         mRecyclerView.setAdapter(mContactListItemAdapter);
                         mContactListItemAdapter.notifyDataSetChanged();
                         if (pos > 0)
@@ -1072,7 +1060,7 @@ public class ContactListActivity extends AppCompatActivity {
                             mContactListItemAdapter.setPos((pos));
                             mContactListItemModel.get(pos).setCheck(true);
                         }
-                        mContactListItemAdapter = new ContactListItemAdapter(this, mContactListItemModel);
+                        mContactListItemAdapter = new ContactListItemAdapter(this, mContactListItemModel, recyclerViewClickListener);
                         mRecyclerView.setAdapter(mContactListItemAdapter);
                         mContactListItemAdapter.notifyDataSetChanged();
                         if (pos > 0)
@@ -1134,8 +1122,7 @@ public class ContactListActivity extends AppCompatActivity {
                 return true;
             case KeyEvent.KEYCODE_ENDCALL:
                 //END CALL
-                makeCall("END CALL");
-                finish();
+                makeEndCall();
                 return true;
 
             default:
@@ -1144,7 +1131,7 @@ public class ContactListActivity extends AppCompatActivity {
     }
 
     private void callDailPad(int value) {
-        startActivity(new Intent(ContactListActivity.this, DailScreenActivity.class).putExtra("num", "" + value));
+        startActivity(new Intent(ContactListActivity.this, VoiceActivity.class).putExtra("num", "" + value).setAction(Constants.OUTGOING_CALL_INVITE));
     }
 
     private void iJustWantToScroll() {

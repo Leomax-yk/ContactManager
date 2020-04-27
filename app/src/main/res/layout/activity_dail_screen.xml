@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/enter_number"
             android:inputType="phone"
-            android:maxLength="10"
+            android:maxLength="15"
             android:nextFocusDown="@+id/linear_save"
             android:nextFocusForward="@+id/linear_save"
             android:nextFocusUp="@+id/text_input_name"

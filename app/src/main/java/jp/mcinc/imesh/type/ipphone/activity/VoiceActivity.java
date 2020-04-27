@@ -19,6 +19,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,8 +27,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -49,12 +53,14 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.iid.FirebaseInstanceId;
+
 import jp.mcinc.imesh.type.ipphone.R;
 import jp.mcinc.imesh.type.ipphone.contants.Constants;
 import jp.mcinc.imesh.type.ipphone.controller.SoundPoolManager;
 import jp.mcinc.imesh.type.ipphone.notification.IncomingCallNotificationService;
 import jp.mcinc.imesh.type.ipphone.session.SessionManager;
 import jp.mcinc.imesh.type.ipphone.util.NetworkManager;
+import jp.mcinc.imesh.type.ipphone.util.Validation;
 //import com.twilio.jwt.accesstoken.AccessToken;
 //import com.twilio.jwt.accesstoken.VoiceGrant;
 //import com.twilio.jwt.accesstoken.AccessToken;
@@ -98,7 +104,6 @@ public class VoiceActivity extends AppCompatActivity {
 
     private static final int MIC_PERMISSION_REQUEST_CODE = 1;
 
-    private String accessToken = "";
     private AudioManager audioManager;
     private int savedAudioMode = AudioManager.MODE_INVALID;
 
@@ -129,6 +134,10 @@ public class VoiceActivity extends AppCompatActivity {
     private ProgressDialog dialog;
     private RequestQueue queue;
 
+    private RelativeLayout mRelativelayout;
+    private EditText mEditNumber;
+    private Button mButtonCall;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,7 +149,7 @@ public class VoiceActivity extends AppCompatActivity {
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
                 | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-
+        mRelativelayout = findViewById(R.id.relative_dail);
         coordinatorLayout = findViewById(R.id.coordinator_layout);
         callActionFab = findViewById(R.id.call_action_fab);
         hangupActionFab = findViewById(R.id.hangup_action_fab);
@@ -148,10 +157,14 @@ public class VoiceActivity extends AppCompatActivity {
         muteActionFab = findViewById(R.id.mute_action_fab);
         chronometer = findViewById(R.id.chronometer);
 
-        callActionFab.setOnClickListener(callActionFabClickListener());
+//        callActionFab.setOnClickListener(callActionFabClickListener());
+        callActionFab.setVisibility(View.GONE);
         hangupActionFab.setOnClickListener(hangupActionFabClickListener());
         holdActionFab.setOnClickListener(holdActionFabClickListener());
         muteActionFab.setOnClickListener(muteActionFabClickListener());
+
+        mButtonCall = findViewById(R.id.button_call);
+        mEditNumber = findViewById(R.id.edit_number);
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -182,8 +195,13 @@ public class VoiceActivity extends AppCompatActivity {
          * Displays a call dialog if the intent contains a call invite
          */
         handleIncomingCallIntent(getIntent());
+        mButtonCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                isValidateAddContactToList();
+            }
+        });
     }
-
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -247,6 +265,7 @@ public class VoiceActivity extends AppCompatActivity {
             @Override
             public void onConnectFailure(@NonNull Call call, @NonNull CallException error) {
                 setAudioFocus(false);
+                mRelativelayout.setVisibility(View.VISIBLE);
                 if (BuildConfig.playCustomRingback) {
                     SoundPoolManager.getInstance(VoiceActivity.this).stopRinging();
                 }
@@ -302,11 +321,22 @@ public class VoiceActivity extends AppCompatActivity {
         };
     }
 
+    private void makePhoneCall() {
+        params.put("to", "+817021908616");
+        ConnectOptions connectOptions = new ConnectOptions.Builder(mAccessToken)
+                .params(params)
+                .build();
+        activeCall = Voice.connect(VoiceActivity.this, connectOptions, callListener);
+        setCallUI();
+    }
+
     /*
      * The UI state when there is an active call
      */
     private void setCallUI() {
-        callActionFab.hide();
+        mRelativelayout.setVisibility(View.GONE);
+        muteActionFab.setVisibility(View.GONE);
+//        callActionFab.hide();
         hangupActionFab.show();
         holdActionFab.show();
         muteActionFab.show();
@@ -319,7 +349,7 @@ public class VoiceActivity extends AppCompatActivity {
      * Reset UI elements
      */
     private void resetUI() {
-        callActionFab.show();
+//        callActionFab.show();
         muteActionFab.setImageDrawable(ContextCompat.getDrawable(VoiceActivity.this, R.drawable.ic_mic_white_24dp));
         holdActionFab.hide();
         holdActionFab.setBackgroundTintList(ColorStateList
@@ -328,6 +358,7 @@ public class VoiceActivity extends AppCompatActivity {
         hangupActionFab.hide();
         chronometer.setVisibility(View.INVISIBLE);
         chronometer.stop();
+        mRelativelayout.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -361,7 +392,18 @@ public class VoiceActivity extends AppCompatActivity {
             String action = intent.getAction();
             activeCallInvite = intent.getParcelableExtra(Constants.INCOMING_CALL_INVITE);
             activeCallNotificationId = intent.getIntExtra(Constants.INCOMING_CALL_NOTIFICATION_ID, 0);
-
+            if (intent.hasExtra("num")) {
+                mEditNumber.setText("" + intent.getExtras().getInt("num"));
+                mEditNumber.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mEditNumber.setSelection(mEditNumber.getText().length());
+                        mEditNumber.setFocusable(true);
+                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                    }
+                });
+            }
             switch (action) {
                 case Constants.ACTION_INCOMING_CALL:
                     handleIncomingCall();
@@ -451,7 +493,7 @@ public class VoiceActivity extends AppCompatActivity {
             // Place a call
             EditText contact = ((AlertDialog) dialog).findViewById(R.id.contact);
             params.put("to", "+817021908616");
-            ConnectOptions connectOptions = new ConnectOptions.Builder(accessToken)
+            ConnectOptions connectOptions = new ConnectOptions.Builder(mAccessToken)
                     .params(params)
                     .build();
             activeCall = Voice.connect(VoiceActivity.this, connectOptions, callListener);
@@ -715,38 +757,28 @@ public class VoiceActivity extends AppCompatActivity {
     private void retrieveAccessToken() {
         if (NetworkManager.isConnectedToNet(this)) {
             try {
-                dialog = new ProgressDialog(this);
-                dialog.setMessage("Getting Access token, Please wait...");
-                dialog.setCancelable(false);
-                dialog.show();
+//                dialog = new ProgressDialog(this);
+//                dialog.setMessage("Getting Access token, Please wait...");
+//                dialog.setCancelable(false);
+//                dialog.show();
                 queue = Volley.newRequestQueue(this);
-
-                JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, GET_ACCESS_TOKEN_URL + sessionManager.getImenumber() , null,
+                JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, GET_ACCESS_TOKEN_URL + sessionManager.getDeviceId(), null,
                         new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response) {
                                 try {
                                     Log.e(TAG, "onResponse: " + response.toString());
-                                    accessToken = response.toString();
-                                    if (dialog.isShowing()) {
-                                        dialog.dismiss();
-                                    }
+                                    mAccessToken = response.toString();
                                     registerForCallInvites();
                                 } catch (Exception e) {
                                     Log.e(TAG, "onResponse: " + e.getMessage());
-                                    if (dialog.isShowing()) {
-                                        dialog.dismiss();
-                                    }
                                 }
                             }
                         },
                         new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                if (dialog.isShowing()) {
-                                    dialog.dismiss();
-                                }
-                            Toast.makeText(VoiceActivity.this, "Failed to get Access token", Toast.LENGTH_SHORT).show();
+                                Log.e(TAG, "Failed to get Access token: " + error.getMessage());
                             }
                         }) {
                     @Override
@@ -764,4 +796,82 @@ public class VoiceActivity extends AppCompatActivity {
             Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show();
         }
     }
+
+
+    private void isValidateAddContactToList() {
+        if (Validation.validateString(mEditNumber.getText().toString()) && Validation.isMobileNumberValid(mEditNumber.getText().toString())) {
+            makePhoneCall();
+        } else {
+            Toast.makeText(getApplicationContext(), "Enter mobile number properly", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
+                //BACK
+                finish();
+                return true;
+            case KeyEvent.KEYCODE_CLEAR:
+                //CLEAR
+                if (mEditNumber != null && mEditNumber.length() > 0) {
+                    mEditNumber.setText("" + mEditNumber.getText().toString().substring(0, mEditNumber.length() - 1));
+                } else {
+                    finish();
+                }
+                return true;
+            case KeyEvent.KEYCODE_CALL:
+                //PICK CALL
+                isValidateAddContactToList();
+                return true;
+            case KeyEvent.KEYCODE_ENDCALL:
+                //END CALL
+                finish();
+                return true;
+            case KeyEvent.KEYCODE_HOME:
+                //END CALL
+
+                return true;
+            case KeyEvent.KEYCODE_0:
+                callDailPad(0);
+                return true;
+            case KeyEvent.KEYCODE_1:
+                callDailPad(1);
+                return true;
+            case KeyEvent.KEYCODE_2:
+                callDailPad(2);
+                return true;
+            case KeyEvent.KEYCODE_3:
+                callDailPad(3);
+                return true;
+            case KeyEvent.KEYCODE_4:
+                callDailPad(4);
+                return true;
+            case KeyEvent.KEYCODE_5:
+                callDailPad(5);
+                return true;
+            case KeyEvent.KEYCODE_6:
+                callDailPad(6);
+                return true;
+            case KeyEvent.KEYCODE_7:
+                callDailPad(7);
+                return true;
+            case KeyEvent.KEYCODE_8:
+                callDailPad(8);
+                return true;
+            case KeyEvent.KEYCODE_9:
+                callDailPad(9);
+                return true;
+            default:
+                return super.onKeyUp(keyCode, event);
+        }
+    }
+
+    private void callDailPad(int value) {
+        if (mEditNumber != null) {
+            mEditNumber.setText("" + mEditNumber.getText().toString() + value);
+        }
+    }
+
 }
