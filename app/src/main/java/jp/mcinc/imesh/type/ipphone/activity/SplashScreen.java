@@ -46,22 +46,6 @@ public class SplashScreen extends AppCompatActivity {
             }
         }
 
-        if (intent.hasExtra("deviceId")) {
-            sessionManager.setDeviceId(intent.getStringExtra("deviceId"));
-            sessionManager.setOpen(true);
-            if (intent.hasExtra("refreshToken")) {
-                sessionManager.setRefreshToken(intent.getStringExtra("refreshToken"));
-                sessionManager.setOpen(true);
-                if (intent.hasExtra("idToken")) {
-                    sessionManager.setIdToken(intent.getStringExtra("idToken"));
-                    sessionManager.setOpen(true);
-                    Toast.makeText(this, "Got Token", Toast.LENGTH_SHORT).show();
-                }else {
-                    Toast.makeText(this, "No Data", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-
     }
 
     @Override

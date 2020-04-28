@@ -778,10 +778,6 @@ public class VoiceActivity extends AppCompatActivity {
     private void retrieveAccessToken() {
         if (NetworkManager.isConnectedToNet(this)) {
             try {
-//                dialog = new ProgressDialog(this);
-//                dialog.setMessage("Getting Access token, Please wait...");
-//                dialog.setCancelable(false);
-//                dialog.show();
                 queue = Volley.newRequestQueue(this);
                 JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, GET_ACCESS_TOKEN_URL + sessionManager.getDeviceId(), null,
                         new Response.Listener<JSONObject>() {

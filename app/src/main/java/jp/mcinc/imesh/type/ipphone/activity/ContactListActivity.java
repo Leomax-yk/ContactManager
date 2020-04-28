@@ -94,7 +94,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import static jp.mcinc.imesh.type.ipphone.contants.Constants.ACCESS_TOKEN;
 import static jp.mcinc.imesh.type.ipphone.contants.Constants.CALL_SID_KEY;
+import static jp.mcinc.imesh.type.ipphone.contants.Constants.DEVICE_ID;
 import static jp.mcinc.imesh.type.ipphone.contants.Constants.GET_ACCESS_TOKEN_URL;
 import static jp.mcinc.imesh.type.ipphone.contants.Constants.ID_TOKEN;
 
@@ -184,10 +186,11 @@ public class ContactListActivity extends AppCompatActivity {
         dbManager = new DBManager(this);
         dbManager.open();
 
-        GetAccessToken();
-
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
+        mAccessToken = ACCESS_TOKEN;
+        registerForCallInvites();
+        ///GetAccessToken();
         /*
          * Setup the broadcast receiver to be notified of FCM Token updates
          * or incoming call invite in this Activity.
@@ -394,7 +397,8 @@ public class ContactListActivity extends AppCompatActivity {
                     handleCancel();
                     break;
                 case Constants.ACTION_FCM_TOKEN:
-                    GetAccessToken();
+                    mAccessToken = ACCESS_TOKEN;
+                    //GetAccessToken();
                     break;
                 case Constants.ACTION_ACCEPT:
                     answer();
@@ -468,14 +472,18 @@ public class ContactListActivity extends AppCompatActivity {
     }
 
     private void makePhoneCall() {
-        if(!sessionManager.isCallImeshStart()) {
-            params.put("to", "+817021908616");
-            ConnectOptions connectOptions = new ConnectOptions.Builder(mAccessToken)
-                    .params(params)
-                    .build();
-            activeCall = Voice.connect(ContactListActivity.this, connectOptions, callListener);
-            setCallUI();
-            sessionManager.setCallStart(true);
+        try{
+            if(!sessionManager.isCallImeshStart()) {
+                params.put("to", "+817021908616");
+                ConnectOptions connectOptions = new ConnectOptions.Builder(mAccessToken)
+                        .params(params)
+                        .build();
+                activeCall = Voice.connect(ContactListActivity.this, connectOptions, callListener);
+                setCallUI();
+                sessionManager.setCallStart(true);
+            }
+        }catch (Exception e){
+            Log.e(TAG, "makePhoneCall: "+e.getMessage());
         }
     }
 
@@ -537,7 +545,6 @@ public class ContactListActivity extends AppCompatActivity {
     private void registerForCallInvites() {
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult -> {
             String fcmToken = instanceIdResult.getToken();
-            Log.i(TAG, "Registering with FCM");
             Voice.register(mAccessToken, Voice.RegistrationChannel.FCM, fcmToken, registrationListener);
         });
     }
@@ -675,7 +682,8 @@ public class ContactListActivity extends AppCompatActivity {
                         "Microphone permissions needed. Please allow in your application settings.",
                         Snackbar.LENGTH_LONG).show();
             } else {
-                GetAccessToken();
+                mAccessToken = ACCESS_TOKEN;
+//                GetAccessToken();
             }
         }
     }
@@ -722,60 +730,57 @@ public class ContactListActivity extends AppCompatActivity {
                 .isAtLeast(Lifecycle.State.STARTED);
     }
 
-    private void GetAccessToken() {
-        if (NetworkManager.isConnectedToNet(this)) {
-            try {
-                dialog = new ProgressDialog(this);
-                dialog.setMessage("Getting Access token, Please wait...");
-                dialog.setCancelable(false);
-                dialog.show();
-                queue = Volley.newRequestQueue(this);
-
-                JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, GET_ACCESS_TOKEN_URL + sessionManager.getDeviceId(), null,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                try {
-                                    Log.e(TAG, "onResponse: " + response.toString());
-                                    mAccessToken = response.toString();
-                                    if (dialog.isShowing()) {
-                                        dialog.dismiss();
-                                    }
-                                    registerForCallInvites();
-                                } catch (Exception e) {
-                                    Log.e(TAG, "onResponse: " + e.getMessage());
-                                    if (dialog.isShowing()) {
-                                        dialog.dismiss();
-                                    }
-                                }
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                if (dialog.isShowing()) {
-                                    dialog.dismiss();
-                                }
-                                mAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJpc3MiOiJTS2RiZmZiZjU3NjBmODNjZTQ4MmM2ZmUyMzlkZDQxYzBmIiwiZXhwIjoxNTg3NzE2MzczLCJqdGkiOiJTS2RiZmZiZjU3NjBmODNjZTQ4MmM2ZmUyMzlkZDQxYzBmLTE1ODc3MTI3NzMiLCJzdWIiOiJBQ2E3OGFjMjRmNjM4N2QxZjIwOGY2OWYyOGI2ZDg0YzgyIiwiZ3JhbnRzIjp7ImlkZW50aXR5IjoiSU1FSToxMjU5NDU2ODk1NDU0OTciLCJ2b2ljZSI6eyJpbmNvbWluZyI6eyJhbGxvdyI6dHJ1ZX0sIm91dGdvaW5nIjp7ImFwcGxpY2F0aW9uX3NpZCI6IkFQNDM4ODRkODBhNDVmNGVkODA2YjI3YTlhNWJhMWE4OWMifX19fQ.dXp2tbnLXqTH5yvhTiwFKWIE0QkL8niTrwY-RDH-eqY";
-                                registerForCallInvites();
-                                Log.e(TAG, "onErrorResponse: to get access token ");
-                            }
-                        }) {
-                    @Override
-                    public Map<String, String> getHeaders() {
-                        HashMap<String, String> params = new HashMap<String, String>();
-                        params.put("Authorization", ID_TOKEN);
-                        return params;
-                    }
-                };
-                queue.add(getRequest);
-            } catch (Exception e) {
-                Log.e(TAG, "refershToken: " + e.getMessage());
-            }
-        } else {
-            Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show();
-        }
-    }
+//    private void GetAccessToken() {
+//        if (NetworkManager.isConnectedToNet(this)) {
+//            try {
+//                dialog = new ProgressDialog(this);
+//                dialog.setMessage("Getting Access token, Please wait...");
+//                dialog.setCancelable(false);
+//                dialog.show();
+//                queue = Volley.newRequestQueue(this);
+//                JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, GET_ACCESS_TOKEN_URL + sessionManager.getDeviceId(), null,
+//                        new Response.Listener<JSONObject>() {
+//                            @Override
+//                            public void onResponse(JSONObject response) {
+//                                try {
+//                                    Log.e(TAG, "onResponse: " + response.toString());
+//                                    mAccessToken = response.toString();
+//                                    if (dialog.isShowing()) {
+//                                        dialog.dismiss();
+//                                    }
+//                                    registerForCallInvites();
+//                                } catch (Exception e) {
+//                                    Log.e(TAG, "onResponse: " + e.getMessage());
+//                                    if (dialog.isShowing()) {
+//                                        dialog.dismiss();
+//                                    }
+//                                }
+//                            }
+//                        },
+//                        new Response.ErrorListener() {
+//                            @Override
+//                            public void onErrorResponse(VolleyError error) {
+//                                if (dialog.isShowing()) {
+//                                    dialog.dismiss();
+//                                }
+//                                Log.e(TAG, "onErrorResponse: to get access token ");
+//                            }
+//                        }) {
+//                    @Override
+//                    public Map<String, String> getHeaders() {
+//                        HashMap<String, String> params = new HashMap<String, String>();
+//                        params.put("Authorization", ID_TOKEN);
+//                        return params;
+//                    }
+//                };
+//                queue.add(getRequest);
+//            } catch (Exception e) {
+//                Log.e(TAG, "refershToken: " + e.getMessage());
+//            }
+//        } else {
+//            Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show();
+//        }
+//    }
 
     @Override
     protected void onResume() {

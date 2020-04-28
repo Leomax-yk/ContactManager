@@ -8,7 +8,6 @@ public class Constants {
 
     public static final String MCURL = "https://stg-ajt-mcaccount-eb.mcapps.jp/api/v1.0";
     public static final String VPTURL = "https://stg-ajt-vpt-eb.mcapps.jp/api/v1/";
-
     //    Orignianl : call project Dashboard
 //    public static final String ACCOUNT_SID = "ACfec7df38e00a510a01919088b484bf3c";
 //    public static final String AUTH_TOKEN = "4a3a4a35df79ddb969cb0cdd045aecaf";
@@ -53,10 +52,19 @@ public class Constants {
     public static String ID_TOKEN = "";
     public static String DEVICE_ID = "";
 
+    //getting id token
     public static final String REFRESH_TOKEN_URL = MCURL + "/Token/refresh";
+
+    //getting device id and purchasenumber and purchasenumbersid using idtoken
     public static final String CREATE_TWILLIO_URL = VPTURL + "TwilioIncommingPhones";
+
+    //delete number
     public static final String DELETE_TWILLIO_URL = VPTURL + "TwilioIncommingPhones";
+
+    //getting customerCd and purchasenumber and purchasenumbersid using idtoken
     public static final String GET_TWILLIO_URL = VPTURL + "TwilioIncommingPhones";
+
+    //getting device id and number and sid using idtoken
     public static final String GET_ACCESS_TOKEN_URL = VPTURL + "TwilioAccessTokens/";
 
     public static void sendCallEndBroadcast(Context context){
