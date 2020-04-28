@@ -1,6 +1,7 @@
 package jp.mcinc.imesh.type.ipphone.fcm;
 
 import android.content.Intent;
+import android.renderscript.ScriptGroup;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -10,12 +11,18 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import jp.mcinc.imesh.type.ipphone.contants.Constants;
+import jp.mcinc.imesh.type.ipphone.model.CreateBindingResponse;
 import jp.mcinc.imesh.type.ipphone.notification.IncomingCallNotificationService;
+import retrofit2.Call;
+import retrofit2.Response;
+
 import com.twilio.voice.CallException;
 import com.twilio.voice.CallInvite;
 import com.twilio.voice.CancelledCallInvite;
 import com.twilio.voice.MessageListener;
 import com.twilio.voice.Voice;
+
+import java.io.IOException;
 
 import static android.provider.ContactsContract.CommonDataKinds.Identity.IDENTITY;
 
@@ -100,7 +107,6 @@ public class VoiceFirebaseMessagingService extends FirebaseMessagingService {
         Intent intent = new Intent(this, IncomingCallNotificationService.class);
         intent.setAction(Constants.ACTION_CANCEL_CALL);
         intent.putExtra(Constants.CANCELLED_CALL_INVITE, cancelledCallInvite);
-
         startService(intent);
     }
 }

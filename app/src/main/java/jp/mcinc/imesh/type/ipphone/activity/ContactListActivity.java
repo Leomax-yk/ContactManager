@@ -188,9 +188,7 @@ public class ContactListActivity extends AppCompatActivity {
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        mAccessToken = ACCESS_TOKEN;
-        registerForCallInvites();
-        ///GetAccessToken();
+        GetAccessToken();
         /*
          * Setup the broadcast receiver to be notified of FCM Token updates
          * or incoming call invite in this Activity.
@@ -397,8 +395,7 @@ public class ContactListActivity extends AppCompatActivity {
                     handleCancel();
                     break;
                 case Constants.ACTION_FCM_TOKEN:
-                    mAccessToken = ACCESS_TOKEN;
-                    //GetAccessToken();
+                    GetAccessToken();
                     break;
                 case Constants.ACTION_ACCEPT:
                     answer();
@@ -682,8 +679,8 @@ public class ContactListActivity extends AppCompatActivity {
                         "Microphone permissions needed. Please allow in your application settings.",
                         Snackbar.LENGTH_LONG).show();
             } else {
-                mAccessToken = ACCESS_TOKEN;
-//                GetAccessToken();
+//                mAccessToken = ACCESS_TOKEN;
+                GetAccessToken();
             }
         }
     }
@@ -730,57 +727,57 @@ public class ContactListActivity extends AppCompatActivity {
                 .isAtLeast(Lifecycle.State.STARTED);
     }
 
-//    private void GetAccessToken() {
-//        if (NetworkManager.isConnectedToNet(this)) {
-//            try {
-//                dialog = new ProgressDialog(this);
-//                dialog.setMessage("Getting Access token, Please wait...");
-//                dialog.setCancelable(false);
-//                dialog.show();
-//                queue = Volley.newRequestQueue(this);
-//                JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, GET_ACCESS_TOKEN_URL + sessionManager.getDeviceId(), null,
-//                        new Response.Listener<JSONObject>() {
-//                            @Override
-//                            public void onResponse(JSONObject response) {
-//                                try {
-//                                    Log.e(TAG, "onResponse: " + response.toString());
-//                                    mAccessToken = response.toString();
-//                                    if (dialog.isShowing()) {
-//                                        dialog.dismiss();
-//                                    }
-//                                    registerForCallInvites();
-//                                } catch (Exception e) {
-//                                    Log.e(TAG, "onResponse: " + e.getMessage());
-//                                    if (dialog.isShowing()) {
-//                                        dialog.dismiss();
-//                                    }
-//                                }
-//                            }
-//                        },
-//                        new Response.ErrorListener() {
-//                            @Override
-//                            public void onErrorResponse(VolleyError error) {
-//                                if (dialog.isShowing()) {
-//                                    dialog.dismiss();
-//                                }
-//                                Log.e(TAG, "onErrorResponse: to get access token ");
-//                            }
-//                        }) {
-//                    @Override
-//                    public Map<String, String> getHeaders() {
-//                        HashMap<String, String> params = new HashMap<String, String>();
-//                        params.put("Authorization", ID_TOKEN);
-//                        return params;
-//                    }
-//                };
-//                queue.add(getRequest);
-//            } catch (Exception e) {
-//                Log.e(TAG, "refershToken: " + e.getMessage());
-//            }
-//        } else {
-//            Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show();
-//        }
-//    }
+    private void GetAccessToken() {
+        if (NetworkManager.isConnectedToNet(this)) {
+            try {
+                dialog = new ProgressDialog(this);
+                dialog.setMessage("Getting Access token, Please wait...");
+                dialog.setCancelable(false);
+                dialog.show();
+                queue = Volley.newRequestQueue(this);
+                JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, GET_ACCESS_TOKEN_URL + sessionManager.getDeviceId(), null,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                try {
+                                    Log.e(TAG, "onResponse: " + response.toString());
+                                    mAccessToken = response.toString();
+                                    if (dialog.isShowing()) {
+                                        dialog.dismiss();
+                                    }
+                                    registerForCallInvites();
+                                } catch (Exception e) {
+                                    Log.e(TAG, "onResponse: " + e.getMessage());
+                                    if (dialog.isShowing()) {
+                                        dialog.dismiss();
+                                    }
+                                }
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                if (dialog.isShowing()) {
+                                    dialog.dismiss();
+                                }
+                                Log.e(TAG, "Failed to get Access token: " + error.getMessage());
+                            }
+                        }) {
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        HashMap<String, String> params = new HashMap<String, String>();
+                        params.put("Authorization", ID_TOKEN);
+                        return params;
+                    }
+                };
+                queue.add(getRequest);
+            } catch (Exception e) {
+                Log.e(TAG, "refershToken: " + e.getMessage());
+            }
+        } else {
+            Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     @Override
     protected void onResume() {
