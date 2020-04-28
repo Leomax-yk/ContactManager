@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: com.fasterxml.jackson.core:jackson-databind:2.9.9.1@jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.9.9.1/211dfab27bdd15a569247fee4690a07a177044f8/jackson-databind-2.9.9.1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.9.9.1/f7656b58520a1aa81a21279472205602ad40c1e8/jackson-databind-2.9.9.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.9.9.1/ac9b1a3dbdfac9cf6a8618ad5c9bf8dabc965bef/jackson-databind-2.9.9.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

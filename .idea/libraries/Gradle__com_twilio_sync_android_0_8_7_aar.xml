@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: com.twilio:sync-android:0.8.7@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/f1f43cac3dcebbeede41e8789e28dfa4/jetified-sync-android-0.8.7/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/f1f43cac3dcebbeede41e8789e28dfa4/jetified-sync-android-0.8.7/res" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.twilio/sync-android/0.8.7/8ee0e8b26d3a8cdc938534d121d5b7ac91978579/sync-android-0.8.7-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES />
+  </library>
+</component>
