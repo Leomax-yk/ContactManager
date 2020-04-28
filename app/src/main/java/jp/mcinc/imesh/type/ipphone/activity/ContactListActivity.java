@@ -149,6 +149,7 @@ public class ContactListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_contact_list);
         getSupportActionBar().hide();
         sessionManager = new SessionManager(this);
+        CALL_SID_KEY = sessionManager.getNumberSid();
 
         mRecyclerView = findViewById(R.id.recycler_view_contact);
         mLinearMenu = findViewById(R.id.linear_menu);
@@ -783,7 +784,6 @@ public class ContactListActivity extends AppCompatActivity {
             pos = position;
             makeCall("CALL");
         };
-        CALL_SID_KEY = sessionManager.getNumberSid();
 
         if (mLinearMenu.getVisibility() != View.VISIBLE) {
             menuVisible = false;

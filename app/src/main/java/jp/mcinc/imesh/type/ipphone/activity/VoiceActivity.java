@@ -57,6 +57,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import jp.mcinc.imesh.type.ipphone.R;
 import jp.mcinc.imesh.type.ipphone.contants.Constants;
 import jp.mcinc.imesh.type.ipphone.controller.SoundPoolManager;
+import jp.mcinc.imesh.type.ipphone.database.DBManager;
 import jp.mcinc.imesh.type.ipphone.notification.IncomingCallNotificationService;
 import jp.mcinc.imesh.type.ipphone.session.SessionManager;
 import jp.mcinc.imesh.type.ipphone.util.NetworkManager;
@@ -75,11 +76,14 @@ import com.twilio.voice.Voice;
 
 import org.json.JSONObject;
 
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
 import static jp.mcinc.imesh.type.ipphone.contants.Constants.ACCESS_TOKEN;
+import static jp.mcinc.imesh.type.ipphone.contants.Constants.CALL_SID_KEY;
 import static jp.mcinc.imesh.type.ipphone.contants.Constants.CLIEENT_ID;
 import static jp.mcinc.imesh.type.ipphone.contants.Constants.GET_ACCESS_TOKEN_URL;
 import static jp.mcinc.imesh.type.ipphone.contants.Constants.ID_TOKEN;
@@ -137,12 +141,16 @@ public class VoiceActivity extends AppCompatActivity {
     private RelativeLayout mRelativelayout;
     private EditText mEditNumber;
     private Button mButtonCall;
+    private DBManager dbManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_voice);
         sessionManager = new SessionManager(this);
+        CALL_SID_KEY = sessionManager.getNumberSid();
+        dbManager = new DBManager(this);
+        dbManager.open();
         // These flags ensure that the activity can be launched when the screen is locked.
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
@@ -321,15 +329,28 @@ public class VoiceActivity extends AppCompatActivity {
         };
     }
 
+
     private void makePhoneCall() {
-        params.put("to", "+817021908616");
-        ConnectOptions connectOptions = new ConnectOptions.Builder(mAccessToken)
-                .params(params)
-                .build();
-        activeCall = Voice.connect(VoiceActivity.this, connectOptions, callListener);
-        setCallUI();
+        if(!sessionManager.isCallImeshStart()) {
+            params.put("to", "+817021908616");
+            ConnectOptions connectOptions = new ConnectOptions.Builder(mAccessToken)
+                    .params(params)
+                    .build();
+            activeCall = Voice.connect(VoiceActivity.this, connectOptions, callListener);
+            setCallUI();
+            sessionManager.setCallStart(true);
+        }
     }
 
+    private void makeEndCall(){
+        if(sessionManager.isCallStart()){
+            SoundPoolManager.getInstance(VoiceActivity.this).playDisconnect();
+            resetUI();
+            disconnect();
+            Constants.sendCallEndBroadcast(getApplicationContext());
+            makeCall("END CALL");
+        }
+    }
     /*
      * The UI state when there is an active call
      */
@@ -800,11 +821,22 @@ public class VoiceActivity extends AppCompatActivity {
 
     private void isValidateAddContactToList() {
         if (Validation.validateString(mEditNumber.getText().toString()) && Validation.isMobileNumberValid(mEditNumber.getText().toString())) {
-            makePhoneCall();
+            makeCall("CALL");
         } else {
             Toast.makeText(getApplicationContext(), "Enter mobile number properly", Toast.LENGTH_SHORT).show();
         }
     }
+
+    public void makeCall(String str) {
+        if (str.equalsIgnoreCase("CALL")) {
+            Date date = new Date();
+            dbManager.insertHistory(3, "UNKNOWN", "+817021908616", "" + DateFormat.getDateInstance(DateFormat.MEDIUM).format(date), "" + DateFormat.getTimeInstance().format(date));
+            makePhoneCall();
+        } else {
+            Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {

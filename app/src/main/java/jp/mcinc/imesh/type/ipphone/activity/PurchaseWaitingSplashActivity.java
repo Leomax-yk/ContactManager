@@ -77,59 +77,58 @@ public class PurchaseWaitingSplashActivity extends AppCompatActivity {
     }
 
 
-    private void refershToken() {
-        try {
-            dialog = new ProgressDialog(this);
-            dialog.setMessage("Getting Refresh token, Please wait...");
-            dialog.setCancelable(false);
-            dialog.show();
-            queue = Volley.newRequestQueue(this);
-            //                HashMap<String, String> jsonObject = new HashMap<String, String>();
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("clientId", CLIEENT_ID);
-            jsonObject.put("refreshToken", REFRESH_TOKEN);
-
-            JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.POST, REFRESH_TOKEN_URL, jsonObject,
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            try {
-                                Log.e(TAG, "onResponse: " + response.toString());
-                                ACCESS_TOKEN = response.getString("accessToken");
-                                ID_TOKEN = response.getString("idToken");
-                                if (dialog.isShowing()) {
-                                    dialog.dismiss();
-                                }
-                                callIncomingNumber();
-                            } catch (Exception e) {
-                                Log.e(TAG, "onResponse: " + e.getMessage());
-                                if (dialog.isShowing()) {
-                                    dialog.dismiss();
-                                }
-                            }
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            if (dialog.isShowing()) {
-                                dialog.dismiss();
-                            }
-                        }
-                    }) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    HashMap<String, String> params = new HashMap<String, String>();
-                    params.put("Authorization", REFRESH_TOKEN);
-                    return params;
-                }
-            };
-            queue.add(getRequest);
-        } catch (Exception e) {
-            Log.e(TAG, "refershToken: " + e.getMessage());
-        }
-    }
-
+//    private void refershToken() {
+//        try {
+//            dialog = new ProgressDialog(this);
+//            dialog.setMessage("Getting Refresh token, Please wait...");
+//            dialog.setCancelable(false);
+//            dialog.show();
+//            queue = Volley.newRequestQueue(this);
+//            //                HashMap<String, String> jsonObject = new HashMap<String, String>();
+//            JSONObject jsonObject = new JSONObject();
+//            jsonObject.put("clientId", CLIEENT_ID);
+//            jsonObject.put("refreshToken", REFRESH_TOKEN);
+//
+//            JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.POST, REFRESH_TOKEN_URL, jsonObject,
+//                    new Response.Listener<JSONObject>() {
+//                        @Override
+//                        public void onResponse(JSONObject response) {
+//                            try {
+//                                Log.e(TAG, "onResponse: " + response.toString());
+//                                ACCESS_TOKEN = response.getString("accessToken");
+//                                ID_TOKEN = response.getString("idToken");
+//                                if (dialog.isShowing()) {
+//                                    dialog.dismiss();
+//                                }
+//                                callIncomingNumber();
+//                            } catch (Exception e) {
+//                                Log.e(TAG, "onResponse: " + e.getMessage());
+//                                if (dialog.isShowing()) {
+//                                    dialog.dismiss();
+//                                }
+//                            }
+//                        }
+//                    },
+//                    new Response.ErrorListener() {
+//                        @Override
+//                        public void onErrorResponse(VolleyError error) {
+//                            if (dialog.isShowing()) {
+//                                dialog.dismiss();
+//                            }
+//                        }
+//                    }) {
+//                @Override
+//                public Map<String, String> getHeaders() {
+//                    HashMap<String, String> params = new HashMap<String, String>();
+//                    params.put("Authorization", REFRESH_TOKEN);
+//                    return params;
+//                }
+//            };
+//            queue.add(getRequest);
+//        } catch (Exception e) {
+//            Log.e(TAG, "refershToken: " + e.getMessage());
+//        }
+//    }
 
     private void callIncomingNumber() {
         try {

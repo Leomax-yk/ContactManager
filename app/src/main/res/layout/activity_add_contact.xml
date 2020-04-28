@@ -45,9 +45,11 @@
                         android:hint="@string/enter_name"
                         android:inputType="text"
                         android:maxLength="30"
-                        android:nextFocusUp="@+id/linear_cancel"
+                        android:imeOptions="actionNext"
+                        android:nextFocusUp="@+id/button_cancel"
                         android:nextFocusDown="@+id/text_input_number"
                         android:nextFocusForward="@+id/text_input_number"
+                        android:nextFocusRight="@+id/text_input_number"
                         android:textColor="@color/colorNormal"
                         android:textSize="@dimen/text_normal_mid_size" />
             </LinearLayout>
@@ -72,9 +74,11 @@
                         android:hint="@string/enter_number"
                         android:inputType="phone"
                         android:maxLength="15"
+                        android:imeOptions="actionNext"
                         android:nextFocusUp="@+id/text_input_name"
-                        android:nextFocusDown="@+id/linear_save"
-                        android:nextFocusForward="@+id/linear_save"
+                        android:nextFocusDown="@+id/button_save"
+                        android:nextFocusRight="@+id/button_save"
+                        android:nextFocusForward="@+id/button_save"
                         android:textColor="@color/colorNormal"
                         android:textSize="@dimen/text_normal_mid_size" />
 
@@ -128,6 +132,7 @@
                 android:nextFocusDown="@+id/button_cancel"
                 android:nextFocusForward="@+id/button_cancel"
                 android:text="@string/save"
+                android:imeOptions="actionDone"
                 android:textColor="@color/colorWhite"
                 android:textAllCaps="true"
                 android:drawableLeft="@drawable/ic_save_white"

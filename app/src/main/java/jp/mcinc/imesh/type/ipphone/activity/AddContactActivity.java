@@ -4,9 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -72,6 +74,28 @@ public class AddContactActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        mEditName.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_NEXT) {
+                    mEditNumber.requestFocus();
+                    return false;
+                }
+                return false;
+            }
+        });
+
+        mEditNumber.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_NEXT) {
+                    mButtonSave.requestFocus();
+                    return false;
+                }
+                return false;
+            }
+        });
     }
 
     private void isValidateAddContactToList() {
@@ -104,12 +128,12 @@ public class AddContactActivity extends AppCompatActivity {
                 return true;
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 //Center key
-//                View newView= this.getCurrentFocus();
-//                if (newView!= null && newView.getId() != R.id.button_save) {
+                View newView= this.getCurrentFocus();
+                if (newView!= null && newView.getId() != R.id.button_save) {
                     isValidateAddContactToList();
-//                }if (newView!= null && newView.getId() != R.id.button_cancel) {
-//                    finish();
-//                }
+                }if (newView!= null && newView.getId() != R.id.button_cancel) {
+                    finish();
+                }
                 return true;
             case KeyEvent.KEYCODE_ENDCALL:
                 //END CALL
