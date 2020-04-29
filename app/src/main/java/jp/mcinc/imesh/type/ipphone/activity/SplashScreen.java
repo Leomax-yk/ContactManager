@@ -45,7 +45,7 @@ public class SplashScreen extends AppCompatActivity {
                 }
             }
         }
-
+        sessionManager.setDeviceId("IMEI:125945689545497");
     }
 
     @Override

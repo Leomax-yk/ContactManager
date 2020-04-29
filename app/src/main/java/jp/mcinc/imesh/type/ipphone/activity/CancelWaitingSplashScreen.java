@@ -53,19 +53,13 @@ public class CancelWaitingSplashScreen extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        final Handler handler = new Handler();
-//        handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                //Do something after 100ms
-//            }
-//        }, 5000);
         if (NetworkManager.isConnectedToNet(this)) {
             deleteIncomingNumber();
         } else {
             Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show();
         }
     }
+
     private void deleteIncomingNumber() {
         try {
             dialog = new ProgressDialog(this);
@@ -74,11 +68,10 @@ public class CancelWaitingSplashScreen extends AppCompatActivity {
             dialog.show();
             queue = Volley.newRequestQueue(this);
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("clientId","IMEI:"+IMEINumber);
-
+            jsonObject.put("deviceId", "" + sessionManager.getDeviceId());
             Log.e(TAG, "callIncomingNumber: " + jsonObject);
 
-            JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.DELETE, DELETE_TWILLIO_URL , jsonObject,
+            JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.DELETE, DELETE_TWILLIO_URL, jsonObject,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {

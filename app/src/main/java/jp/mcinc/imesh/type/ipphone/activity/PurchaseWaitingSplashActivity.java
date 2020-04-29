@@ -128,7 +128,7 @@ public class PurchaseWaitingSplashActivity extends AppCompatActivity {
             queue = Volley.newRequestQueue(this);
 
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("deviceId", "IMEI:125945689545497");
+            jsonObject.put("deviceId", "" + sessionManager.getDeviceId());
             JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.POST, CREATE_TWILLIO_URL, jsonObject,
                     new Response.Listener<JSONObject>() {
                         @Override
