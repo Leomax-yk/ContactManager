@@ -30,22 +30,17 @@ public class SplashScreen extends AppCompatActivity {
         getSupportActionBar().hide();
         sessionManager = new SessionManager(this);
         Intent intent = getIntent();
-        if (intent.hasExtra("device_id")) {
+        if (intent.hasExtra("device_id") & intent.hasExtra("id_token") & intent.hasExtra("refresh_token")) {
             sessionManager.setDeviceId(intent.getStringExtra("device_id"));
             sessionManager.setOpen(true);
-            if (intent.hasExtra("id_token")) {
-                sessionManager.setIdToken(intent.getStringExtra("id_token"));
-                sessionManager.setOpen(true);
-                if (intent.hasExtra("refresh_token")) {
-                    sessionManager.setRefreshToken(intent.getStringExtra("refresh_token"));
-                    sessionManager.setOpen(true);
-                    Toast.makeText(this, "Got Token", Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(this, "No Data", Toast.LENGTH_SHORT).show();
-                }
-            }
+            sessionManager.setIdToken(intent.getStringExtra("id_token"));
+            sessionManager.setOpen(true);
+            sessionManager.setRefreshToken(intent.getStringExtra("refresh_token"));
+            sessionManager.setOpen(true);
+            Toast.makeText(this, "Got tokens", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "No tokens", Toast.LENGTH_SHORT).show();
         }
-
     }
 
     @Override
@@ -55,7 +50,7 @@ public class SplashScreen extends AppCompatActivity {
             ActivityCompat.requestPermissions(SplashScreen.this, new String[]{Manifest.permission.READ_PHONE_STATE}, REQUEST_CODE);
             return;
         } else {
-            processfurther();
+            processFurther();
         }
     }
 
@@ -69,11 +64,9 @@ public class SplashScreen extends AppCompatActivity {
         config.locale = locale;
         getBaseContext().getResources().updateConfiguration(config,
                 getBaseContext().getResources().getDisplayMetrics());
-
-
     }
 
-    private void processfurther() {
+    private void processFurther() {
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -90,7 +83,7 @@ public class SplashScreen extends AppCompatActivity {
                 }
                 finish();
             }
-        }, 6000);
+        }, 4000);
 
 
     }

@@ -92,7 +92,7 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
     implementation 'com.android.volley:volley:1.1.1'
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr2'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.2'
 
     implementation 'com.google.code.gson:gson:2.8.5'
 
@@ -101,9 +101,9 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
 //Twillio API dependency
 //    implementation 'com.twilio:voice-android:3.1.2'
-    implementation group: "com.twilio.sdk", name: "twilio", version: "7.42.0"
+    implementation group: "com.twilio.sdk", name: "twilio", version: "7.47.6"
 //    implementation "com.twilio:sync-android:0.8.7"
-    implementation 'com.twilio:voice-android:5.1.0'
+    implementation 'com.twilio:voice-android:5.1.1'
 //    implementation 'com.twilio:client-android:1.2.17'
     //TEST dependency
     testImplementation 'junit:junit:4.12'

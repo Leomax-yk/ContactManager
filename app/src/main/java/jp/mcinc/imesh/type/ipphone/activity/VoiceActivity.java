@@ -181,7 +181,7 @@ public class VoiceActivity extends AppCompatActivity {
          * or incoming call invite in this Activity.
          */
         voiceBroadcastReceiver = new VoiceBroadcastReceiver();
-        //registerReceiver();
+     //   registerReceiver();
 
         /*
          * Needed for setting/abandoning audio focus during a call
