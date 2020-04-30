@@ -11,16 +11,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -43,13 +39,11 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ProcessLifecycleOwner;
-import androidx.loader.content.CursorLoader;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import jp.mcinc.imesh.type.ipphone.BuildConfig;
 import jp.mcinc.imesh.type.ipphone.adapter.ContactListItemAdapter;
-import jp.mcinc.imesh.type.ipphone.broadcast.BootCompleteBroadCast;
 import jp.mcinc.imesh.type.ipphone.contants.Constants;
 import jp.mcinc.imesh.type.ipphone.controller.SoundPoolManager;
 import jp.mcinc.imesh.type.ipphone.model.ContactListItemModel;
@@ -59,16 +53,12 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.Gson;
-import com.twilio.jwt.accesstoken.AccessToken;
-import com.twilio.twiml.VoiceResponse;
-import com.twilio.twiml.voice.Dial;
-import com.twilio.twiml.voice.Say;
 import com.twilio.voice.Call;
 import com.twilio.voice.CallException;
 import com.twilio.voice.CallInvite;
@@ -77,8 +67,6 @@ import com.twilio.voice.RegistrationException;
 import com.twilio.voice.RegistrationListener;
 import com.twilio.voice.Voice;
 
-import org.json.JSONObject;
-
 import jp.mcinc.imesh.type.ipphone.R;
 
 import jp.mcinc.imesh.type.ipphone.database.DBManager;
@@ -86,7 +74,6 @@ import jp.mcinc.imesh.type.ipphone.notification.IncomingCallNotificationService;
 import jp.mcinc.imesh.type.ipphone.session.SessionManager;
 import jp.mcinc.imesh.type.ipphone.util.NetworkManager;
 
-import java.net.URI;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -94,11 +81,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import static jp.mcinc.imesh.type.ipphone.contants.Constants.ACCESS_TOKEN;
 import static jp.mcinc.imesh.type.ipphone.contants.Constants.CALL_SID_KEY;
-import static jp.mcinc.imesh.type.ipphone.contants.Constants.DEVICE_ID;
 import static jp.mcinc.imesh.type.ipphone.contants.Constants.GET_ACCESS_TOKEN_URL;
-import static jp.mcinc.imesh.type.ipphone.contants.Constants.ID_TOKEN;
 
 public class ContactListActivity extends AppCompatActivity {
     private String TAG = getClass().getSimpleName();
@@ -188,13 +172,13 @@ public class ContactListActivity extends AppCompatActivity {
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        GetAccessToken();
+        getAccessToken();
         /*
          * Setup the broadcast receiver to be notified of FCM Token updates
          * or incoming call invite in this Activity.
          */
         voiceBroadcastReceiver = new VoiceBroadcastReceiver();
-        //registerReceiver();
+        registerReceiver();
 
         /*
          * Needed for setting/abandoning audio focus during a call
@@ -395,7 +379,7 @@ public class ContactListActivity extends AppCompatActivity {
                     handleCancel();
                     break;
                 case Constants.ACTION_FCM_TOKEN:
-                    GetAccessToken();
+                    getAccessToken();
                     break;
                 case Constants.ACTION_ACCEPT:
                     answer();
@@ -680,7 +664,7 @@ public class ContactListActivity extends AppCompatActivity {
                         Snackbar.LENGTH_LONG).show();
             } else {
 //                mAccessToken = ACCESS_TOKEN;
-                GetAccessToken();
+                getAccessToken();
             }
         }
     }
@@ -727,7 +711,7 @@ public class ContactListActivity extends AppCompatActivity {
                 .isAtLeast(Lifecycle.State.STARTED);
     }
 
-    private void GetAccessToken() {
+    private void getAccessToken() {
         if (NetworkManager.isConnectedToNet(this)) {
             try {
                 dialog = new ProgressDialog(this);
@@ -735,12 +719,13 @@ public class ContactListActivity extends AppCompatActivity {
                 dialog.setCancelable(false);
                 dialog.show();
                 queue = Volley.newRequestQueue(this);
-                JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, GET_ACCESS_TOKEN_URL + sessionManager.getDeviceId(), null,
-                        new Response.Listener<JSONObject>() {
+
+                StringRequest getRequest = new StringRequest(Request.Method.GET, GET_ACCESS_TOKEN_URL + sessionManager.getDeviceId(),
+                        new Response.Listener<String>() {
                             @Override
-                            public void onResponse(JSONObject response) {
+                            public void onResponse(String response) {
                                 try {
-                                    Log.e(TAG, "onResponse: " + response.toString());
+                                    Log.d(TAG, "onResponse: " + response.toString());
                                     mAccessToken = response.toString();
                                     if (dialog.isShowing()) {
                                         dialog.dismiss();
@@ -766,13 +751,14 @@ public class ContactListActivity extends AppCompatActivity {
                     @Override
                     public Map<String, String> getHeaders() {
                         HashMap<String, String> params = new HashMap<String, String>();
-                        params.put("Authorization", ID_TOKEN);
+                        params.put("Authorization", sessionManager.getIdToken());
+                        params.put("accept", "text/plain");
                         return params;
                     }
                 };
                 queue.add(getRequest);
             } catch (Exception e) {
-                Log.e(TAG, "refershToken: " + e.getMessage());
+                Log.e(TAG, "refreshToken: " + e.getMessage());
             }
         } else {
             Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show();
@@ -901,13 +887,14 @@ public class ContactListActivity extends AppCompatActivity {
                 makePhoneCall();
             } else {
                 Toast.makeText(getApplicationContext(), "Add Contact to CALL", Toast.LENGTH_SHORT).show();
-                callDailPad(0);
+                //callDailPad(0);
+                makePhoneCall();
             }
         } else
             Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
     }
 
-    private void keyUpDownn(boolean isUp) {
+    private void keyUpDown(boolean isUp) {
         if (isUp) {
             if (menuSelection == 0)
                 menuSelection = 3;
@@ -959,7 +946,7 @@ public class ContactListActivity extends AppCompatActivity {
         }
     }
 
-    private void keyUpDowndelete() {
+    private void keyUpDownDelete() {
         if (deleteSelection == 0)
             deleteSelection = 1;
         else
@@ -1043,9 +1030,9 @@ public class ContactListActivity extends AppCompatActivity {
                     }
                 } else {
                     if (deleteVisible)
-                        keyUpDowndelete();
+                        keyUpDownDelete();
                     else
-                        keyUpDownn(false);
+                        keyUpDown(false);
                 }
                 return true;
             case KeyEvent.KEYCODE_DPAD_UP:
@@ -1072,9 +1059,9 @@ public class ContactListActivity extends AppCompatActivity {
                     }
                 } else {
                     if (deleteVisible)
-                        keyUpDowndelete();
+                        keyUpDownDelete();
                     else
-                        keyUpDownn(true);
+                        keyUpDown(true);
                 }
                 return true;
             case KeyEvent.KEYCODE_DPAD_CENTER:

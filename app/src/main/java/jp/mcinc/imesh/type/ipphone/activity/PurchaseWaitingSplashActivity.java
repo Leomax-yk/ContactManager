@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -59,13 +60,14 @@ public class PurchaseWaitingSplashActivity extends AppCompatActivity {
         super.onResume();
         sessionManager = new SessionManager(this);
         if (NetworkManager.isConnectedToNet(this)) {
-            refershToken();
+           // refreshToken();
+            callIncomingNumber();
         } else {
             Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void refershToken() {
+    private void refreshToken() {
         try {
             dialog = new ProgressDialog(this);
             dialog.setMessage("Getting Refresh token, Please wait...");
@@ -83,9 +85,11 @@ public class PurchaseWaitingSplashActivity extends AppCompatActivity {
                         public void onResponse(JSONObject response) {
                             try {
                                 Log.e(TAG, "onResponse: " + response.toString());
-                                ACCESS_TOKEN = response.getString("accessToken");
-                                ID_TOKEN = response.getString("idToken");
-                                DEVICE_ID = "IMEI:125945689545497";
+                            //  ACCESS_TOKEN = response.getString("accessToken");
+                             // ID_TOKEN = response.getString("idToken");
+                                sessionManager.setRefreshToken(response.getString("accessToken"));
+                                sessionManager.setIdToken(response.getString("idToken"));
+                             // DEVICE_ID = "IMEI:125945689545497";
                                 if (dialog.isShowing()) {
                                     dialog.dismiss();
                                 }
@@ -109,13 +113,15 @@ public class PurchaseWaitingSplashActivity extends AppCompatActivity {
                 @Override
                 public Map<String, String> getHeaders() {
                     HashMap<String, String> params = new HashMap<String, String>();
-                    params.put("Authorization", REFRESH_TOKEN);
+                    params.put("Authorization", sessionManager.getRefreshToken());
+                    params.put("Content-Type", "application/json");
+                    params.put("accept", "text/plain");
                     return params;
                 }
             };
             queue.add(getRequest);
         } catch (Exception e) {
-            Log.e(TAG, "refershToken: " + e.getMessage());
+            Log.e(TAG, "refreshToken: " + e.getMessage());
         }
     }
 
@@ -128,7 +134,8 @@ public class PurchaseWaitingSplashActivity extends AppCompatActivity {
             queue = Volley.newRequestQueue(this);
 
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("deviceId", "" + sessionManager.getDeviceId());
+       //   jsonObject.put("deviceId", "IMEI:125945689545497");
+            jsonObject.put("deviceId", sessionManager.getDeviceId());
             JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.POST, CREATE_TWILLIO_URL, jsonObject,
                     new Response.Listener<JSONObject>() {
                         @Override
@@ -138,7 +145,7 @@ public class PurchaseWaitingSplashActivity extends AppCompatActivity {
                                 if (dialog.isShowing()) {
                                     dialog.dismiss();
                                 }
-                                purchaseNumberSucess(response);
+                                purchaseNumberSuccess(response);
                             } catch (Exception e) {
                                 Log.e(TAG, "onResponse: " + e.getMessage());
                                 if (dialog.isShowing()) {
@@ -155,6 +162,7 @@ public class PurchaseWaitingSplashActivity extends AppCompatActivity {
                                 if (dialog.isShowing()) {
                                     dialog.dismiss();
                                 }
+                                refreshToken();
                             } catch (Exception e) {
                                 Log.e(TAG, "onResponse: " + e.getMessage());
                                 if (dialog.isShowing()) {
@@ -166,27 +174,28 @@ public class PurchaseWaitingSplashActivity extends AppCompatActivity {
                 @Override
                 public Map<String, String> getHeaders() {
                     HashMap<String, String> params = new HashMap<String, String>();
-                    params.put("authorization", ID_TOKEN);
+                    params.put("Authorization", sessionManager.getIdToken());
                     params.put("Content-Type", "application/json");
-                    params.put("Accept", "application/json");
+                    params.put("accept", "application/json");
                     return params;
                 }
             };
             queue.add(getRequest);
         } catch (Exception e) {
-            Log.e(TAG, "refershToken: " + e.getMessage());
+            Log.e(TAG, "callIncomingNumber: " + e.getMessage());
         }
     }
 
-    private void purchaseNumberSucess(JSONObject jsonObject) throws JSONException {
+    private void purchaseNumberSuccess(JSONObject jsonObject) throws JSONException {
         if (jsonObject.has("deviceId"))
-            DEVICE_ID = jsonObject.getString("deviceId");
+            //DEVICE_ID = jsonObject.getString("deviceId");
             sessionManager.setDeviceId(jsonObject.getString("deviceId"));
         if (jsonObject.has("phoneNumber"))
             sessionManager.setNumber(jsonObject.getString("phoneNumber"));
+            Log.d(TAG,"phone number="+jsonObject.getString("phoneNumber"));
         if (jsonObject.has("phoneNumberSid")) {
             sessionManager.setNumberSid(jsonObject.getString("phoneNumberSid"));
-            CALL_SID_KEY = sessionManager.getNumberSid();
+            //CALL_SID_KEY = sessionManager.getNumberSid();
         }
         Intent i = new Intent(PurchaseWaitingSplashActivity.this, PurchaseSuccessActivity.class);
         startActivity(i);
