@@ -384,33 +384,43 @@ public class ContactListActivity extends AppCompatActivity {
         Log.e(TAG, "onKeyUp: " + keyCode);
         switch (keyCode) {
             case KeyEvent.KEYCODE_NUMPAD_0:
+            case KeyEvent.KEYCODE_0:
                 callDailPad("0");
                 return true;
             case KeyEvent.KEYCODE_NUMPAD_1:
+            case KeyEvent.KEYCODE_1:
                 callDailPad("1");
                 return true;
             case KeyEvent.KEYCODE_NUMPAD_2:
+            case KeyEvent.KEYCODE_2:
                 callDailPad("2");
                 return true;
             case KeyEvent.KEYCODE_NUMPAD_3:
+            case KeyEvent.KEYCODE_3:
                 callDailPad("3");
                 return true;
             case KeyEvent.KEYCODE_NUMPAD_4:
+            case KeyEvent.KEYCODE_4:
                 callDailPad("4");
                 return true;
             case KeyEvent.KEYCODE_NUMPAD_5:
+            case KeyEvent.KEYCODE_5:
                 callDailPad("5");
                 return true;
             case KeyEvent.KEYCODE_NUMPAD_6:
+            case KeyEvent.KEYCODE_6:
                 callDailPad("6");
                 return true;
             case KeyEvent.KEYCODE_NUMPAD_7:
+            case KeyEvent.KEYCODE_7:
                 callDailPad("7");
                 return true;
             case KeyEvent.KEYCODE_NUMPAD_8:
+            case KeyEvent.KEYCODE_8:
                 callDailPad("8");
                 return true;
             case KeyEvent.KEYCODE_NUMPAD_9:
+            case KeyEvent.KEYCODE_9:
                 callDailPad("9");
                 return true;
             case KeyEvent.KEYCODE_DPAD_LEFT:
