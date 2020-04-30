@@ -69,8 +69,6 @@ public class CancelWaitingSplashScreen extends AppCompatActivity {
             queue = Volley.newRequestQueue(this);
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("deviceId", "" + sessionManager.getDeviceId());
-            Log.e(TAG, "callIncomingNumber: " + jsonObject);
-
             JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.DELETE, DELETE_TWILLIO_URL, jsonObject,
                     new Response.Listener<JSONObject>() {
                         @Override

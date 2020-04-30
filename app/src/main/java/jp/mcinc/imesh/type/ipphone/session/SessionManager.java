@@ -21,6 +21,7 @@ public class SessionManager {
     public static final String KEY_DEVICE_ID = "KEY_DEVICE_ID";
     public static final String KEY_REFRESH_TOKEN = "KEY_REFRESH_TOKEN";
     public static final String KEY_ID_TOKEN = "KEY_ID_TOKEN";
+    public static final String KEY_ACCESS_TOKEN = "KEY_ACCESS_TOKEN";
     public static final String KEY_CALL_START = "KEY_CALL_START";
     public static final String KEY_CALL_IMESH_START = "KEY_CALL_IMESH_START";
     public static final String KEY_OPEN = "KEY_OPEN";
@@ -126,6 +127,15 @@ public class SessionManager {
     }
 
 
+    public void setAccessToken(String accessToken) {
+        editorGpsOdo.putString(KEY_ACCESS_TOKEN, accessToken);
+        editorGpsOdo.apply();
+    }
+
+    public String getAccessToken(){
+        return prefGpsOdo.getString(KEY_ACCESS_TOKEN,"");
+    }
+
     public void setIdToken(String idToken) {
         editorGpsOdo.putString(KEY_ID_TOKEN, idToken);
         editorGpsOdo.apply();
@@ -145,11 +155,11 @@ public class SessionManager {
     }
 
     public boolean isCallImeshStart(){
-        return prefGpsOdo.getBoolean(KEY_CALL_START,false);
+        return prefGpsOdo.getBoolean(KEY_CALL_IMESH_START,false);
     }
 
     public void setCallImeshStart(boolean callStart) {
-        editorGpsOdo.putBoolean(KEY_CALL_START, callStart);
+        editorGpsOdo.putBoolean(KEY_CALL_IMESH_START, callStart);
         editorGpsOdo.apply();
     }
 

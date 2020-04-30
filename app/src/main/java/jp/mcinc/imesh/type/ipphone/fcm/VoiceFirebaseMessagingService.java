@@ -74,6 +74,7 @@ public class VoiceFirebaseMessagingService extends FirebaseMessagingService {
         Intent intent = new Intent(Constants.ACTION_FCM_TOKEN);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         String identity =  intent.getStringExtra(IDENTITY);
+        Log.e(TAG, "onNewToken: ");
 //        String storedIdentity = sharedPreferences.getString(IDENTITY, null);
 //        if (newIdentity == null) {
 //            // If no identity was provided to us then we use the identity stored in shared preferences.

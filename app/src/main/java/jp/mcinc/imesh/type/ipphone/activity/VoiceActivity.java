@@ -15,9 +15,11 @@ import android.content.res.ColorStateList;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -31,7 +33,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -49,6 +53,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -117,11 +122,10 @@ public class VoiceActivity extends AppCompatActivity {
     // Empty HashMap, never populated for the Quickstart
     HashMap<String, String> params = new HashMap<>();
 
-    private CoordinatorLayout coordinatorLayout;
-    private FloatingActionButton callActionFab;
-    private FloatingActionButton hangupActionFab;
-    private FloatingActionButton holdActionFab;
-    private FloatingActionButton muteActionFab;
+    //    private FloatingActionButton callActionFab;
+//    private FloatingActionButton hangupActionFab;
+//    private FloatingActionButton holdActionFab;
+//    private FloatingActionButton muteActionFab;
     private Chronometer chronometer;
 
     private NotificationManager notificationManager;
@@ -143,6 +147,10 @@ public class VoiceActivity extends AppCompatActivity {
     private Button mButtonCall;
     private DBManager dbManager;
 
+    private TextView mTextName, mTextNumber, mTextStatus;
+    private LinearLayout mLinearStatus, mLinearDetails, mLinearDailing;
+    private boolean makePhoneCallNumber = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -158,22 +166,19 @@ public class VoiceActivity extends AppCompatActivity {
                 | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         mRelativelayout = findViewById(R.id.relative_dail);
-        coordinatorLayout = findViewById(R.id.coordinator_layout);
-        callActionFab = findViewById(R.id.call_action_fab);
-        hangupActionFab = findViewById(R.id.hangup_action_fab);
-        holdActionFab = findViewById(R.id.hold_action_fab);
-        muteActionFab = findViewById(R.id.mute_action_fab);
         chronometer = findViewById(R.id.chronometer);
-
-//        callActionFab.setOnClickListener(callActionFabClickListener());
-        callActionFab.setVisibility(View.GONE);
-        hangupActionFab.setOnClickListener(hangupActionFabClickListener());
-        holdActionFab.setOnClickListener(holdActionFabClickListener());
-        muteActionFab.setOnClickListener(muteActionFabClickListener());
-
         mButtonCall = findViewById(R.id.button_call);
         mEditNumber = findViewById(R.id.edit_number);
 
+        mTextName = findViewById(R.id.text_name);
+        mTextNumber = findViewById(R.id.text_number);
+        mTextStatus = findViewById(R.id.text_status);
+
+        mLinearStatus = findViewById(R.id.linear_details);
+        mLinearDetails = findViewById(R.id.linear_status);
+        mLinearDailing = findViewById(R.id.linear_dailing);
+
+        mLinearDailing.setVisibility(View.GONE);
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         /*
@@ -203,12 +208,6 @@ public class VoiceActivity extends AppCompatActivity {
          * Displays a call dialog if the intent contains a call invite
          */
         handleIncomingCallIntent(getIntent());
-        mButtonCall.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                isValidateAddContactToList();
-            }
-        });
     }
 
     @Override
@@ -221,7 +220,13 @@ public class VoiceActivity extends AppCompatActivity {
         return new RegistrationListener() {
             @Override
             public void onRegistered(@NonNull String accessToken, @NonNull String fcmToken) {
-                Log.d(TAG, "Successfully registered FCM " + fcmToken);
+                if (dialog.isShowing()) {
+                    dialog.dismiss();
+                }
+                Snackbar.make(mRelativelayout, "Successfully registered FCM", Snackbar.LENGTH_LONG).show();
+                if (makePhoneCallNumber)
+                    makeCall("CALL");
+
             }
 
             @Override
@@ -235,7 +240,10 @@ public class VoiceActivity extends AppCompatActivity {
                         error.getMessage());
                 Log.e(TAG, message);
                 Log.e(TAG, "" + accessToken);
-                Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_LONG).show();
+                if (dialog.isShowing()) {
+                    dialog.dismiss();
+                }
+                Snackbar.make(mRelativelayout, message, Snackbar.LENGTH_LONG).show();
             }
         };
     }
@@ -258,6 +266,10 @@ public class VoiceActivity extends AppCompatActivity {
             @Override
             public void onRinging(@NonNull Call call) {
                 Log.d(TAG, "Ringing");
+                mTextStatus.setText("Dailing");
+                mTextName.setText("UNKNOWN");
+                mTextNumber.setText("+817021908616");
+                Snackbar.make(mRelativelayout, "DAILING", Snackbar.LENGTH_LONG).show();
                 /*
                  * When [answerOnBridge](https://www.twilio.com/docs/voice/twiml/dial#answeronbridge)
                  * is enabled in the <Dial> TwiML verb, the caller will not hear the ringback while
@@ -273,7 +285,7 @@ public class VoiceActivity extends AppCompatActivity {
             @Override
             public void onConnectFailure(@NonNull Call call, @NonNull CallException error) {
                 setAudioFocus(false);
-                mRelativelayout.setVisibility(View.VISIBLE);
+                Snackbar.make(mRelativelayout, "CONNECTION FAILED", Snackbar.LENGTH_LONG).show();
                 if (BuildConfig.playCustomRingback) {
                     SoundPoolManager.getInstance(VoiceActivity.this).stopRinging();
                 }
@@ -284,12 +296,16 @@ public class VoiceActivity extends AppCompatActivity {
                         error.getErrorCode(),
                         error.getMessage());
                 Log.e(TAG, message);
-                Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_LONG).show();
+                Snackbar.make(mRelativelayout, message, Snackbar.LENGTH_LONG).show();
                 resetUI();
             }
 
             @Override
             public void onConnected(@NonNull Call call) {
+                Snackbar.make(mRelativelayout, "CONNECTED", Snackbar.LENGTH_LONG).show();
+                mTextStatus.setText("Connected");
+                mTextName.setText("UNKNOWN");
+                mTextNumber.setText("+817021908616");
                 setAudioFocus(true);
                 if (BuildConfig.playCustomRingback) {
                     SoundPoolManager.getInstance(VoiceActivity.this).stopRinging();
@@ -300,16 +316,28 @@ public class VoiceActivity extends AppCompatActivity {
 
             @Override
             public void onReconnecting(@NonNull Call call, @NonNull CallException callException) {
+                Snackbar.make(mRelativelayout, "RECONNECTING", Snackbar.LENGTH_LONG).show();
                 Log.d(TAG, "onReconnecting");
+                mTextStatus.setText("Reconnecting");
+                mTextName.setText("UNKNOWN");
+                mTextNumber.setText("+817021908616");
             }
 
             @Override
             public void onReconnected(@NonNull Call call) {
+                Snackbar.make(mRelativelayout, "RECONNECTED", Snackbar.LENGTH_LONG).show();
                 Log.d(TAG, "onReconnected");
+                mTextStatus.setText("Reconnected");
+                mTextName.setText("UNKNOWN");
+                mTextNumber.setText("+817021908616");
             }
 
             @Override
             public void onDisconnected(@NonNull Call call, CallException error) {
+                Snackbar.make(mRelativelayout, "DISCONNECTED", Snackbar.LENGTH_LONG).show();
+                mTextStatus.setText("Disconnected");
+                mTextName.setText("UNKNOWN");
+                mTextNumber.setText("+817021908616");
                 setAudioFocus(false);
                 if (BuildConfig.playCustomRingback) {
                     SoundPoolManager.getInstance(VoiceActivity.this).stopRinging();
@@ -322,16 +350,15 @@ public class VoiceActivity extends AppCompatActivity {
                             error.getErrorCode(),
                             error.getMessage());
                     Log.e(TAG, message);
-                    Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(mRelativelayout, message, Snackbar.LENGTH_LONG).show();
                 }
                 resetUI();
             }
         };
     }
 
-
     private void makePhoneCall() {
-        if(!sessionManager.isCallImeshStart()) {
+        if (!sessionManager.isCallImeshStart()) {
             params.put("to", "+817021908616");
             ConnectOptions connectOptions = new ConnectOptions.Builder(mAccessToken)
                     .params(params)
@@ -342,25 +369,22 @@ public class VoiceActivity extends AppCompatActivity {
         }
     }
 
-    private void makeEndCall(){
-        if(sessionManager.isCallStart()){
+    private void makeEndCall() {
+        if (sessionManager.isCallStart()) {
             SoundPoolManager.getInstance(VoiceActivity.this).playDisconnect();
             resetUI();
             disconnect();
             Constants.sendCallEndBroadcast(getApplicationContext());
-            makeCall("END CALL");
+            showToast("END CALL");
         }
     }
+
     /*
      * The UI state when there is an active call
      */
     private void setCallUI() {
+        mLinearDailing.setVisibility(View.VISIBLE);
         mRelativelayout.setVisibility(View.GONE);
-        muteActionFab.setVisibility(View.GONE);
-//        callActionFab.hide();
-        hangupActionFab.show();
-        holdActionFab.show();
-        muteActionFab.show();
         chronometer.setVisibility(View.VISIBLE);
         chronometer.setBase(SystemClock.elapsedRealtime());
         chronometer.start();
@@ -370,13 +394,7 @@ public class VoiceActivity extends AppCompatActivity {
      * Reset UI elements
      */
     private void resetUI() {
-//        callActionFab.show();
-        muteActionFab.setImageDrawable(ContextCompat.getDrawable(VoiceActivity.this, R.drawable.ic_mic_white_24dp));
-        holdActionFab.hide();
-        holdActionFab.setBackgroundTintList(ColorStateList
-                .valueOf(ContextCompat.getColor(this, R.color.colorAccent)));
-        muteActionFab.hide();
-        hangupActionFab.hide();
+        mLinearDailing.setVisibility(View.GONE);
         chronometer.setVisibility(View.INVISIBLE);
         chronometer.stop();
         mRelativelayout.setVisibility(View.VISIBLE);
@@ -385,13 +403,28 @@ public class VoiceActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        mEditNumber.post(new Runnable() {
+            @Override
+            public void run() {
+                mEditNumber.setSelection(mEditNumber.getText().length());
+                mEditNumber.setInputType(InputType.TYPE_CLASS_PHONE);
+                mEditNumber.requestFocus();
+            }
+        });
+
+        mButtonCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                isValidateAddContactToList();
+            }
+        });
         /*
          * Ensure the microphone permission is enabled
          */
         if (!checkPermissionForMicrophone()) {
             requestPermissionForMicrophone();
         } else {
-            retrieveAccessToken();
+            refershToken();
         }
         registerReceiver();
     }
@@ -414,16 +447,10 @@ public class VoiceActivity extends AppCompatActivity {
             activeCallInvite = intent.getParcelableExtra(Constants.INCOMING_CALL_INVITE);
             activeCallNotificationId = intent.getIntExtra(Constants.INCOMING_CALL_NOTIFICATION_ID, 0);
             if (intent.hasExtra("num")) {
-                mEditNumber.setText("" + intent.getExtras().getInt("num"));
-                mEditNumber.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mEditNumber.setSelection(mEditNumber.getText().length());
-                        mEditNumber.setFocusable(true);
-                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-                    }
-                });
+                mEditNumber.setText("" + intent.getExtras().getString("num"));
+                if (intent.hasExtra("call")) {
+                    makePhoneCallNumber = intent.getExtras().getBoolean("call");
+                }
             }
             switch (action) {
                 case Constants.ACTION_INCOMING_CALL:
@@ -436,7 +463,7 @@ public class VoiceActivity extends AppCompatActivity {
                     handleCancel();
                     break;
                 case Constants.ACTION_FCM_TOKEN:
-                    retrieveAccessToken();
+//                    retrieveAccessToken();
                     break;
                 case Constants.ACTION_ACCEPT:
                     answer();
@@ -614,7 +641,7 @@ public class VoiceActivity extends AppCompatActivity {
         if (activeCall != null) {
             boolean hold = !activeCall.isOnHold();
             activeCall.hold(hold);
-            applyFabState(holdActionFab, hold);
+//            applyFabState(holdActionFab, hold);
         }
     }
 
@@ -622,7 +649,7 @@ public class VoiceActivity extends AppCompatActivity {
         if (activeCall != null) {
             boolean mute = !activeCall.isMuted();
             activeCall.mute(mute);
-            applyFabState(muteActionFab, mute);
+//            applyFabState(muteActionFab, mute);
         }
     }
 
@@ -681,7 +708,7 @@ public class VoiceActivity extends AppCompatActivity {
 
     private void requestPermissionForMicrophone() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECORD_AUDIO)) {
-            Snackbar.make(coordinatorLayout,
+            Snackbar.make(mRelativelayout,
                     "Microphone permissions needed. Please allow in your application settings.",
                     Snackbar.LENGTH_LONG).show();
         } else {
@@ -699,11 +726,11 @@ public class VoiceActivity extends AppCompatActivity {
          */
         if (requestCode == MIC_PERMISSION_REQUEST_CODE && permissions.length > 0) {
             if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                Snackbar.make(coordinatorLayout,
+                Snackbar.make(mRelativelayout,
                         "Microphone permissions needed. Please allow in your application settings.",
                         Snackbar.LENGTH_LONG).show();
             } else {
-                retrieveAccessToken();
+                //retrieveAccessToken();
             }
         }
     }
@@ -772,6 +799,66 @@ public class VoiceActivity extends AppCompatActivity {
                 .isAtLeast(Lifecycle.State.STARTED);
     }
 
+    private void refershToken() {
+        try {
+            dialog = new ProgressDialog(this);
+            dialog.setMessage("Getting Access token, Please wait...");
+            dialog.setCancelable(false);
+            dialog.show();
+            queue = Volley.newRequestQueue(this);
+            //                HashMap<String, String> jsonObject = new HashMap<String, String>();
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("clientId", CLIEENT_ID);
+            jsonObject.put("refreshToken", sessionManager.getRefreshToken());
+
+            JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.POST, REFRESH_TOKEN_URL, jsonObject,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                Log.e(TAG, "onResponse: " + response.toString());
+                                ACCESS_TOKEN = response.getString("accessToken");
+                                ID_TOKEN = response.getString("idToken");
+                                sessionManager.setAccessToken(ACCESS_TOKEN);
+                                sessionManager.setIdToken(ID_TOKEN);
+//                                if (dialog.isShowing()) {
+//                                    dialog.dismiss();
+//                                }
+                                retrieveAccessToken();
+                            } catch (Exception e) {
+                                Log.e(TAG, "onResponse: " + e.getMessage());
+                                if (dialog.isShowing()) {
+                                    dialog.dismiss();
+                                }
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            if (dialog.isShowing()) {
+                                dialog.dismiss();
+                            }
+                            Snackbar.make(mRelativelayout, "Purchase Failed", Snackbar.LENGTH_SHORT).show();
+                            Intent i = new Intent(VoiceActivity.this, SplashScreen.class);
+                            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(i);
+                            finish();
+                        }
+                    }) {
+                @Override
+                public Map<String, String> getHeaders() {
+                    HashMap<String, String> params = new HashMap<String, String>();
+                    params.put("Authorization", sessionManager.getRefreshToken());
+                    return params;
+                }
+            };
+            queue.add(getRequest);
+        } catch (Exception e) {
+            Log.e(TAG, "refershToken: " + e.getMessage());
+        }
+    }
+
     /*
      * Get an access token from your Twilio access token server
      */
@@ -779,33 +866,40 @@ public class VoiceActivity extends AppCompatActivity {
         if (NetworkManager.isConnectedToNet(this)) {
             try {
                 queue = Volley.newRequestQueue(this);
-                JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, GET_ACCESS_TOKEN_URL + sessionManager.getDeviceId(), null,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                try {
-                                    Log.e(TAG, "onResponse: " + response.toString());
-                                    mAccessToken = response.toString();
-                                    registerForCallInvites();
-                                } catch (Exception e) {
-                                    Log.e(TAG, "onResponse: " + e.getMessage());
-                                }
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, GET_ACCESS_TOKEN_URL + sessionManager.getDeviceId(), new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            Log.e(TAG, "onResponse: Access token" + response.toString());
+                            mAccessToken = response.toString();
+                            registerForCallInvites();
+                        } catch (Exception e) {
+                            if (dialog.isShowing()) {
+                                dialog.dismiss();
                             }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                Log.e(TAG, "Failed to get Access token: " + error.getMessage());
-                            }
-                        }) {
+                            Log.e(TAG, "onResponse: " + e.getMessage());
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if (dialog.isShowing()) {
+                            dialog.dismiss();
+                        }
+                        mAccessToken = sessionManager.getAccessToken();
+                        Log.e(TAG, "Failed to get Access token: " + mAccessToken);
+                    }
+                }) {
                     @Override
                     public Map<String, String> getHeaders() {
                         HashMap<String, String> params = new HashMap<String, String>();
-                        params.put("Authorization", ID_TOKEN);
+                        params.put("Authorization", sessionManager.getIdToken());
+                        params.put("Content-Type", "application/json");
+                        params.put("Accept", "application/json");
                         return params;
                     }
                 };
-                queue.add(getRequest);
+                queue.add(stringRequest);
             } catch (Exception e) {
                 Log.e(TAG, "refershToken: " + e.getMessage());
             }
@@ -817,20 +911,23 @@ public class VoiceActivity extends AppCompatActivity {
 
     private void isValidateAddContactToList() {
         if (Validation.validateString(mEditNumber.getText().toString()) && Validation.isMobileNumberValid(mEditNumber.getText().toString())) {
+            mLinearDailing.setVisibility(View.VISIBLE);
             makeCall("CALL");
         } else {
             Toast.makeText(getApplicationContext(), "Enter mobile number properly", Toast.LENGTH_SHORT).show();
         }
     }
 
-    public void makeCall(String str) {
-        if (str.equalsIgnoreCase("CALL")) {
+    public void makeCall(String number) {
+        if (!makePhoneCallNumber) {
             Date date = new Date();
             dbManager.insertHistory(3, "UNKNOWN", "+817021908616", "" + DateFormat.getDateInstance(DateFormat.MEDIUM).format(date), "" + DateFormat.getTimeInstance().format(date));
-            makePhoneCall();
-        } else {
-            Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
         }
+        makePhoneCall();
+    }
+
+    private void showToast(String message) {
+        Snackbar.make(mRelativelayout, message, Snackbar.LENGTH_LONG).show();
     }
 
 
@@ -838,11 +935,9 @@ public class VoiceActivity extends AppCompatActivity {
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
-                //BACK
-                finish();
-                return true;
             case KeyEvent.KEYCODE_CLEAR:
                 //CLEAR
+                //BACK
                 if (mEditNumber != null && mEditNumber.length() > 0) {
                     mEditNumber.setText("" + mEditNumber.getText().toString().substring(0, mEditNumber.length() - 1));
                 } else {
@@ -855,40 +950,39 @@ public class VoiceActivity extends AppCompatActivity {
                 return true;
             case KeyEvent.KEYCODE_ENDCALL:
                 //END CALL
-                finish();
+                disconnect();
                 return true;
             case KeyEvent.KEYCODE_HOME:
                 //END CALL
-
                 return true;
-            case KeyEvent.KEYCODE_0:
+            case KeyEvent.KEYCODE_NUMPAD_0:
                 callDailPad(0);
                 return true;
-            case KeyEvent.KEYCODE_1:
+            case KeyEvent.KEYCODE_NUMPAD_1:
                 callDailPad(1);
                 return true;
-            case KeyEvent.KEYCODE_2:
+            case KeyEvent.KEYCODE_NUMPAD_2:
                 callDailPad(2);
                 return true;
-            case KeyEvent.KEYCODE_3:
+            case KeyEvent.KEYCODE_NUMPAD_3:
                 callDailPad(3);
                 return true;
-            case KeyEvent.KEYCODE_4:
+            case KeyEvent.KEYCODE_NUMPAD_4:
                 callDailPad(4);
                 return true;
-            case KeyEvent.KEYCODE_5:
+            case KeyEvent.KEYCODE_NUMPAD_5:
                 callDailPad(5);
                 return true;
-            case KeyEvent.KEYCODE_6:
+            case KeyEvent.KEYCODE_NUMPAD_6:
                 callDailPad(6);
                 return true;
-            case KeyEvent.KEYCODE_7:
+            case KeyEvent.KEYCODE_NUMPAD_7:
                 callDailPad(7);
                 return true;
-            case KeyEvent.KEYCODE_8:
+            case KeyEvent.KEYCODE_NUMPAD_8:
                 callDailPad(8);
                 return true;
-            case KeyEvent.KEYCODE_9:
+            case KeyEvent.KEYCODE_NUMPAD_9:
                 callDailPad(9);
                 return true;
             default:
@@ -900,6 +994,14 @@ public class VoiceActivity extends AppCompatActivity {
         if (mEditNumber != null) {
             mEditNumber.setText("" + mEditNumber.getText().toString() + value);
         }
+        mEditNumber.post(new Runnable() {
+            @Override
+            public void run() {
+                mEditNumber.setSelection(mEditNumber.getText().length());
+                mEditNumber.setInputType(InputType.TYPE_CLASS_PHONE);
+                mEditNumber.requestFocus();
+            }
+        });
     }
 
 }

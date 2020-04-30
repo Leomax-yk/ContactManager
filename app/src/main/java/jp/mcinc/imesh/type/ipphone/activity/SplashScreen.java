@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +19,9 @@ import jp.mcinc.imesh.type.ipphone.session.SessionManager;
 import jp.mcinc.imesh.type.ipphone.R;
 
 import java.util.Locale;
+
+import static jp.mcinc.imesh.type.ipphone.contants.Constants.DEVICE_ID;
+import static jp.mcinc.imesh.type.ipphone.contants.Constants.REFRESH_TOKEN;
 
 public class SplashScreen extends AppCompatActivity {
     private SessionManager sessionManager;
@@ -30,27 +35,54 @@ public class SplashScreen extends AppCompatActivity {
         getSupportActionBar().hide();
         sessionManager = new SessionManager(this);
         Intent intent = getIntent();
-        if (intent.hasExtra("device_id") & intent.hasExtra("id_token") & intent.hasExtra("refresh_token")) {
+        if (intent.hasExtra("device_id")) {
             sessionManager.setDeviceId(intent.getStringExtra("device_id"));
             sessionManager.setOpen(true);
-            sessionManager.setIdToken(intent.getStringExtra("id_token"));
-            sessionManager.setOpen(true);
-            sessionManager.setRefreshToken(intent.getStringExtra("refresh_token"));
-            sessionManager.setOpen(true);
-            Toast.makeText(this, "Got tokens", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "No tokens", Toast.LENGTH_SHORT).show();
+            if (intent.hasExtra("id_token")) {
+                sessionManager.setIdToken(intent.getStringExtra("id_token"));
+                sessionManager.setOpen(true);
+                if (intent.hasExtra("refresh_token")) {
+                    sessionManager.setRefreshToken(intent.getStringExtra("refresh_token"));
+                    sessionManager.setOpen(true);
+                    Toast.makeText(this, "Got Token", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(this, "No Data", Toast.LENGTH_SHORT).show();
+                }
+            }
         }
+        //For testing data purpose
+        DEVICE_ID = "IMEI:125945689545497";
+        sessionManager.setDeviceId(DEVICE_ID);
+        sessionManager.setRefreshToken(REFRESH_TOKEN);
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (ActivityCompat.checkSelfPermission(SplashScreen.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(SplashScreen.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(SplashScreen.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE);
+
+        } else  if (ActivityCompat.checkSelfPermission(SplashScreen.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(SplashScreen.this, new String[]{Manifest.permission.READ_PHONE_STATE}, REQUEST_CODE);
-            return;
         } else {
-            processFurther();
+            //Dynamic passing of IMEI NUmber
+            TelephonyManager telMgr = (TelephonyManager)
+                    getSystemService(this.TELEPHONY_SERVICE);
+            String deviceId;
+            if (Build.VERSION.SDK_INT >= 26) {
+                if (telMgr.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA) {
+                    deviceId = telMgr.getMeid();
+                } else if (telMgr.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM) {
+                    deviceId = telMgr.getImei();
+                } else {
+                    deviceId = ""; // default!!!
+                }
+            } else {
+                deviceId = telMgr.getDeviceId();
+            }
+//            sessionManager.setDeviceId("IMEI:" + deviceId);
+            processfurther();
         }
     }
 
@@ -64,9 +96,11 @@ public class SplashScreen extends AppCompatActivity {
         config.locale = locale;
         getBaseContext().getResources().updateConfiguration(config,
                 getBaseContext().getResources().getDisplayMetrics());
+
+
     }
 
-    private void processFurther() {
+    private void processfurther() {
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -83,7 +117,7 @@ public class SplashScreen extends AppCompatActivity {
                 }
                 finish();
             }
-        }, 4000);
+        }, 6000);
 
 
     }
