@@ -3,10 +3,10 @@
     package="jp.mcinc.imesh.type.ipphone">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-<!--    <uses-permission android:name="jp.mcinc.imesh.type.m.permission.READ_STATE"/>-->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!--    <uses-permission android:name="jp.mcinc.imesh.type.m.permission.READ_STATE"/>-->
 
     <application
         android:name="jp.mcinc.imesh.type.ipphone.AppController"
