@@ -361,11 +361,12 @@ public class ContactListActivity extends AppCompatActivity {
                 return true;
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 //Left Key
-
                 return true;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 //Right Key
-
+                showToast("History");
+                Intent i = new Intent(ContactListActivity.this, HistoryListActivity.class);
+                startActivity(i);
                 return true;
             case KeyEvent.KEYCODE_DPAD_DOWN:
                 //Down Key
