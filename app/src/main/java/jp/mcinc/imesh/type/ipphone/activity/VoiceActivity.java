@@ -186,7 +186,7 @@ public class VoiceActivity extends AppCompatActivity {
          * or incoming call invite in this Activity.
          */
         voiceBroadcastReceiver = new VoiceBroadcastReceiver();
-     //   registerReceiver();
+        registerReceiver();
 
         /*
          * Needed for setting/abandoning audio focus during a call
@@ -268,7 +268,8 @@ public class VoiceActivity extends AppCompatActivity {
                 Log.d(TAG, "Ringing");
                 mTextStatus.setText("Dailing");
                 mTextName.setText("UNKNOWN");
-                mTextNumber.setText("+817021908616");
+                mTextNumber.setText(mEditNumber.getText().toString());
+          //      mTextNumber.setText("+817021908616");
                 Snackbar.make(mRelativelayout, "DAILING", Snackbar.LENGTH_LONG).show();
                 /*
                  * When [answerOnBridge](https://www.twilio.com/docs/voice/twiml/dial#answeronbridge)
@@ -305,7 +306,8 @@ public class VoiceActivity extends AppCompatActivity {
                 Snackbar.make(mRelativelayout, "CONNECTED", Snackbar.LENGTH_LONG).show();
                 mTextStatus.setText("Connected");
                 mTextName.setText("UNKNOWN");
-                mTextNumber.setText("+817021908616");
+                //mTextNumber.setText("+817021908616");
+                mTextNumber.setText( mEditNumber.getText().toString());
                 setAudioFocus(true);
                 if (BuildConfig.playCustomRingback) {
                     SoundPoolManager.getInstance(VoiceActivity.this).stopRinging();
@@ -320,7 +322,8 @@ public class VoiceActivity extends AppCompatActivity {
                 Log.d(TAG, "onReconnecting");
                 mTextStatus.setText("Reconnecting");
                 mTextName.setText("UNKNOWN");
-                mTextNumber.setText("+817021908616");
+              //  mTextNumber.setText("+817021908616");
+                mTextNumber.setText( mEditNumber.getText().toString());
             }
 
             @Override
@@ -329,7 +332,8 @@ public class VoiceActivity extends AppCompatActivity {
                 Log.d(TAG, "onReconnected");
                 mTextStatus.setText("Reconnected");
                 mTextName.setText("UNKNOWN");
-                mTextNumber.setText("+817021908616");
+               // mTextNumber.setText("+817021908616");
+                mTextNumber.setText( mEditNumber.getText().toString());
             }
 
             @Override
@@ -337,7 +341,9 @@ public class VoiceActivity extends AppCompatActivity {
                 Snackbar.make(mRelativelayout, "DISCONNECTED", Snackbar.LENGTH_LONG).show();
                 mTextStatus.setText("Disconnected");
                 mTextName.setText("UNKNOWN");
-                mTextNumber.setText("+817021908616");
+//                mTextNumber.setText("+817021908616");
+                mTextNumber.setText( mEditNumber.getText().toString());
+
                 setAudioFocus(false);
                 if (BuildConfig.playCustomRingback) {
                     SoundPoolManager.getInstance(VoiceActivity.this).stopRinging();
@@ -359,7 +365,8 @@ public class VoiceActivity extends AppCompatActivity {
 
     private void makePhoneCall() {
         if (!sessionManager.isCallImeshStart()) {
-            params.put("to", "+817021908616");
+         //   params.put("to", "+817021908616");
+            params.put("to",mEditNumber.getText().toString());
             ConnectOptions connectOptions = new ConnectOptions.Builder(mAccessToken)
                     .params(params)
                     .build();
@@ -463,7 +470,7 @@ public class VoiceActivity extends AppCompatActivity {
                     handleCancel();
                     break;
                 case Constants.ACTION_FCM_TOKEN:
-//                    retrieveAccessToken();
+                    retrieveAccessToken();
                     break;
                 case Constants.ACTION_ACCEPT:
                     answer();
@@ -516,6 +523,8 @@ public class VoiceActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action != null && (action.equals(Constants.ACTION_INCOMING_CALL) || action.equals(Constants.ACTION_CANCEL_CALL))) {
+
+
                 /*
                  * Handle the incoming or cancelled call invite
                  */
@@ -540,7 +549,8 @@ public class VoiceActivity extends AppCompatActivity {
         return (dialog, which) -> {
             // Place a call
             EditText contact = ((AlertDialog) dialog).findViewById(R.id.contact);
-            params.put("to", "+817021908616");
+    //        params.put("to", "+817021908616");
+            params.put("to",mEditNumber.getText().toString());
             ConnectOptions connectOptions = new ConnectOptions.Builder(mAccessToken)
                     .params(params)
                     .build();
@@ -821,9 +831,9 @@ public class VoiceActivity extends AppCompatActivity {
                                 ID_TOKEN = response.getString("idToken");
                                 sessionManager.setAccessToken(ACCESS_TOKEN);
                                 sessionManager.setIdToken(ID_TOKEN);
-//                                if (dialog.isShowing()) {
-//                                    dialog.dismiss();
-//                                }
+                                if (dialog.isShowing()) {
+                                    dialog.dismiss();
+                                }
                                 retrieveAccessToken();
                             } catch (Exception e) {
                                 Log.e(TAG, "onResponse: " + e.getMessage());
@@ -855,7 +865,7 @@ public class VoiceActivity extends AppCompatActivity {
             };
             queue.add(getRequest);
         } catch (Exception e) {
-            Log.e(TAG, "refershToken: " + e.getMessage());
+            Log.e(TAG, "refreshToken: " + e.getMessage());
         }
     }
 
@@ -895,13 +905,13 @@ public class VoiceActivity extends AppCompatActivity {
                         HashMap<String, String> params = new HashMap<String, String>();
                         params.put("Authorization", sessionManager.getIdToken());
                         params.put("Content-Type", "application/json");
-                        params.put("Accept", "application/json");
+                        params.put("accept", "text/html");
                         return params;
                     }
                 };
                 queue.add(stringRequest);
             } catch (Exception e) {
-                Log.e(TAG, "refershToken: " + e.getMessage());
+                Log.e(TAG, "retrieveAccessToken: " + e.getMessage());
             }
         } else {
             Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show();
@@ -921,7 +931,9 @@ public class VoiceActivity extends AppCompatActivity {
     public void makeCall(String number) {
         if (!makePhoneCallNumber) {
             Date date = new Date();
-            dbManager.insertHistory(3, "UNKNOWN", "+817021908616", "" + DateFormat.getDateInstance(DateFormat.MEDIUM).format(date), "" + DateFormat.getTimeInstance().format(date));
+           // dbManager.insertHistory(3, "UNKNOWN", "+817021908616", "" + DateFormat.getDateInstance(DateFormat.MEDIUM).format(date), "" + DateFormat.getTimeInstance().format(date));
+            dbManager.insertHistory(3, "UNKNOWN", mEditNumber.getText().toString(), "" + DateFormat.getDateInstance(DateFormat.MEDIUM).format(date), "" + DateFormat.getTimeInstance().format(date));
+
         }
         makePhoneCall();
     }
@@ -1003,5 +1015,4 @@ public class VoiceActivity extends AppCompatActivity {
             }
         });
     }
-
 }

@@ -1,36 +1,14 @@
 package jp.mcinc.imesh.type.ipphone.activity;
 
-import android.Manifest;
-import android.app.AlertDialog;
-import android.app.NotificationManager;
-import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
-import android.database.Cursor;
 import android.graphics.Color;
-import android.media.AudioAttributes;
-import android.media.AudioFocusRequest;
-import android.media.AudioManager;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Chronometer;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -38,68 +16,26 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.ProcessLifecycleOwner;
-import androidx.loader.content.CursorLoader;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import jp.mcinc.imesh.type.ipphone.BuildConfig;
-import jp.mcinc.imesh.type.ipphone.adapter.ContactListItemAdapter;
-import jp.mcinc.imesh.type.ipphone.broadcast.BootCompleteBroadCast;
-import jp.mcinc.imesh.type.ipphone.contants.Constants;
-import jp.mcinc.imesh.type.ipphone.controller.SoundPoolManager;
-import jp.mcinc.imesh.type.ipphone.model.ContactListItemModel;
 
-//import com.google.common.collect.Lists;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.Gson;
-import com.twilio.jwt.accesstoken.AccessToken;
-import com.twilio.twiml.VoiceResponse;
-import com.twilio.twiml.voice.Dial;
-import com.twilio.twiml.voice.Say;
-import com.twilio.voice.Call;
-import com.twilio.voice.CallException;
-import com.twilio.voice.CallInvite;
-import com.twilio.voice.ConnectOptions;
-import com.twilio.voice.RegistrationException;
-import com.twilio.voice.RegistrationListener;
-import com.twilio.voice.Voice;
 
-import org.json.JSONObject;
-
-import jp.mcinc.imesh.type.ipphone.R;
-
-import jp.mcinc.imesh.type.ipphone.database.DBManager;
-import jp.mcinc.imesh.type.ipphone.notification.IncomingCallNotificationService;
-import jp.mcinc.imesh.type.ipphone.session.SessionManager;
-import jp.mcinc.imesh.type.ipphone.util.NetworkManager;
-
-import java.net.URI;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 
-import static jp.mcinc.imesh.type.ipphone.contants.Constants.ACCESS_TOKEN;
+import jp.mcinc.imesh.type.ipphone.R;
+import jp.mcinc.imesh.type.ipphone.adapter.ContactListItemAdapter;
+import jp.mcinc.imesh.type.ipphone.contants.Constants;
+import jp.mcinc.imesh.type.ipphone.database.DBManager;
+import jp.mcinc.imesh.type.ipphone.model.ContactListItemModel;
+import jp.mcinc.imesh.type.ipphone.session.SessionManager;
+
 import static jp.mcinc.imesh.type.ipphone.contants.Constants.CALL_SID_KEY;
-import static jp.mcinc.imesh.type.ipphone.contants.Constants.DEVICE_ID;
-import static jp.mcinc.imesh.type.ipphone.contants.Constants.GET_ACCESS_TOKEN_URL;
-import static jp.mcinc.imesh.type.ipphone.contants.Constants.ID_TOKEN;
+
+//import com.google.common.collect.Lists;
 
 public class ContactListActivity extends AppCompatActivity {
     private String TAG = getClass().getSimpleName();
