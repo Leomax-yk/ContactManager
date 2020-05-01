@@ -25,6 +25,7 @@ public class EditContactActivity extends AppCompatActivity {
     private EditText mEditName, mEditNumber;
     private ContactListItemModel mContactListItemModel;
     private Button mButtonSave, mButtonCancel;
+    private int focus = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +47,13 @@ public class EditContactActivity extends AppCompatActivity {
 
         mEditName.setText("" + mContactListItemModel.getOwnerName());
         mEditNumber.setText("" + mContactListItemModel.getOwnerNumber());
+        mEditNumber.post(new Runnable() {
+            @Override
+            public void run() {
+                mEditNumber.setSelection(mEditNumber.getText().length());
+                mEditName.requestFocus();
+            }
+        });
         //Open Database connection
         dbManager = new DBManager(this);
         dbManager.open();
@@ -117,21 +125,55 @@ public class EditContactActivity extends AppCompatActivity {
                 return true;
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 //Center key
-                View newView= this.getCurrentFocus();
-                if (newView!= null && newView.getId() != R.id.button_save) {
+                if (focus == 1) {
+                    mEditNumber.requestFocus();
+                    focus = 2;
+                } else if (focus == 2) {
+                    mButtonSave.requestFocus();
+                    focus = 3;
+                } else if (focus == 3) {
                     isValidateAddContactToList();
-                }if (newView!= null && newView.getId() != R.id.button_cancel) {
-                finish();
-            }
-            return true;
-            case KeyEvent.KEYCODE_CALL:
-                //PICK CALL
-
+                } else if (focus == 4) {
+                    finish();
+                }
                 return true;
             case KeyEvent.KEYCODE_ENDCALL:
                 //END CALL
                 finish();
                 return true;
+            case KeyEvent.KEYCODE_DPAD_DOWN: {
+                if (focus == 1) {
+                    mEditNumber.requestFocus();
+                    focus = 2;
+                } else if (focus == 2) {
+                    mButtonSave.requestFocus();
+                    focus = 3;
+                } else if (focus == 3) {
+                    mButtonCancel.requestFocus();
+                    focus = 4;
+                } else if (focus == 4) {
+                    mEditName.requestFocus();
+                    focus = 1;
+                }
+            }
+            return true;
+            case KeyEvent.KEYCODE_DPAD_UP: {
+//                Toast.makeText(getApplicationContext(), "up "+focus, Toast.LENGTH_SHORT).show();
+                if (focus == 1) {
+                    mButtonCancel.requestFocus();
+                    focus = 4;
+                } else if (focus == 2) {
+                    mEditName.requestFocus();
+                    focus = 1;
+                } else if (focus == 3) {
+                    mEditNumber.requestFocus();
+                    focus = 2;
+                } else if (focus == 4) {
+                    mButtonSave.requestFocus();
+                    focus = 3;
+                }
+            }
+            return true;
             case KeyEvent.KEYCODE_HOME:
                 //END CALL
 

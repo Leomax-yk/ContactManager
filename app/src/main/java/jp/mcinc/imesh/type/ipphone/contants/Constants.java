@@ -70,7 +70,7 @@ public class Constants {
     public static void sendCallEndBroadcast(Context context){
         try{
             Intent shareIntent = new Intent();
-            shareIntent.setAction("jp.mcinc.imesh.type.m.action.TALK_END");
+            shareIntent.setAction("jp.mcinc.imesh.type.ipphone.action.TALK_END");
             shareIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
             shareIntent.setPackage("jp.mcinc.imesh.type.m");
             context.sendBroadcast(shareIntent);
@@ -82,7 +82,7 @@ public class Constants {
     public static void sendCallStartBroadcast(Context context){
         try{
             Intent shareIntent = new Intent();
-            shareIntent.setAction("jp.mcinc.imesh.type.m.action.TALK_STARTED");
+            shareIntent.setAction("jp.mcinc.imesh.type.ipphone.action.TALK_STARTED");
             shareIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
             shareIntent.setPackage("jp.mcinc.imesh.type.m");
             context.sendBroadcast(shareIntent);
@@ -93,7 +93,7 @@ public class Constants {
     public static void sendBootCompletedStartBroadcast(Context context){
         try{
             Intent shareIntent = new Intent();
-            shareIntent.setAction("jp.mcinc.imesh.type.m.action.BOOT_COMPLETED");
+            shareIntent.setAction("jp.mcinc.imesh.type.ipphone.action.BOOT_COMPLETED");
             shareIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
             shareIntent.setPackage("jp.mcinc.imesh.type.m");
             context.sendBroadcast(shareIntent);

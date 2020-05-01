@@ -285,6 +285,7 @@ public class VoiceActivity extends AppCompatActivity {
 
             @Override
             public void onConnectFailure(@NonNull Call call, @NonNull CallException error) {
+                Constants.sendCallEndBroadcast(getApplicationContext());
                 setAudioFocus(false);
                 Snackbar.make(mRelativelayout, "CONNECTION FAILED", Snackbar.LENGTH_LONG).show();
                 if (BuildConfig.playCustomRingback) {
@@ -303,6 +304,7 @@ public class VoiceActivity extends AppCompatActivity {
 
             @Override
             public void onConnected(@NonNull Call call) {
+                Constants.sendCallStartBroadcast(getApplicationContext());
                 Snackbar.make(mRelativelayout, "CONNECTED", Snackbar.LENGTH_LONG).show();
                 mTextStatus.setText("Connected");
                 mTextName.setText("UNKNOWN");
@@ -328,6 +330,7 @@ public class VoiceActivity extends AppCompatActivity {
 
             @Override
             public void onReconnected(@NonNull Call call) {
+                Constants.sendCallStartBroadcast(getApplicationContext());
                 Snackbar.make(mRelativelayout, "RECONNECTED", Snackbar.LENGTH_LONG).show();
                 Log.d(TAG, "onReconnected");
                 mTextStatus.setText("Reconnected");
@@ -338,6 +341,7 @@ public class VoiceActivity extends AppCompatActivity {
 
             @Override
             public void onDisconnected(@NonNull Call call, CallException error) {
+                Constants.sendCallEndBroadcast(getApplicationContext());
                 Snackbar.make(mRelativelayout, "DISCONNECTED", Snackbar.LENGTH_LONG).show();
                 mTextStatus.setText("Disconnected");
                 mTextName.setText("UNKNOWN");
@@ -365,7 +369,6 @@ public class VoiceActivity extends AppCompatActivity {
 
     private void makePhoneCall() {
         if (!sessionManager.isCallImeshStart()) {
-         //   params.put("to", "+817021908616");
             params.put("to",mEditNumber.getText().toString());
             ConnectOptions connectOptions = new ConnectOptions.Builder(mAccessToken)
                     .params(params)
@@ -373,6 +376,8 @@ public class VoiceActivity extends AppCompatActivity {
             activeCall = Voice.connect(VoiceActivity.this, connectOptions, callListener);
             setCallUI();
             sessionManager.setCallStart(true);
+        }else{
+            showToast("Cannot make a Call");
         }
     }
 
@@ -381,7 +386,6 @@ public class VoiceActivity extends AppCompatActivity {
             SoundPoolManager.getInstance(VoiceActivity.this).playDisconnect();
             resetUI();
             disconnect();
-            Constants.sendCallEndBroadcast(getApplicationContext());
             showToast("END CALL");
         }
     }
@@ -962,7 +966,7 @@ public class VoiceActivity extends AppCompatActivity {
                 return true;
             case KeyEvent.KEYCODE_ENDCALL:
                 //END CALL
-                disconnect();
+                makeEndCall();
                 return true;
             case KeyEvent.KEYCODE_HOME:
                 //END CALL

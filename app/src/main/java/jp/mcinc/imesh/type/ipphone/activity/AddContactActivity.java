@@ -2,6 +2,8 @@ package jp.mcinc.imesh.type.ipphone.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -23,6 +25,7 @@ public class AddContactActivity extends AppCompatActivity {
     private LinearLayout mLinearSave, mLinearCancel;
     private Button mButtonSave, mButtonCancel;
     private EditText mEditName, mEditNumber;
+    private int focus = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +41,7 @@ public class AddContactActivity extends AppCompatActivity {
 
         mEditName = findViewById(R.id.edit_name);
         mEditNumber = findViewById(R.id.edit_number);
-
+        mEditName.requestFocus();
         //Open Database connection
         dbManager = new DBManager(this);
         dbManager.open();
@@ -104,10 +107,9 @@ public class AddContactActivity extends AppCompatActivity {
                 if (Validation.validateString(mEditNumber.getText().toString()) && Validation.isMobileNumberValid(mEditNumber.getText().toString())) {
                     dbManager.insert(mEditName.getText().toString().trim(), mEditNumber.getText().toString().trim());
                     Intent i = new Intent(AddContactActivity.this, ContactSavedActivity.class);
-                    i.putExtra("contactstate",0);
+                    i.putExtra("contactstate", 0);
                     startActivity(i);
                     finish();
-
                 } else {
                     Toast.makeText(getApplicationContext(), "Enter mobile number properly", Toast.LENGTH_SHORT).show();
                 }
@@ -128,10 +130,15 @@ public class AddContactActivity extends AppCompatActivity {
                 return true;
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 //Center key
-                View newView= this.getCurrentFocus();
-                if (newView!= null && newView.getId() != R.id.button_save) {
+                if (focus == 1) {
+                    mEditNumber.requestFocus();
+                    focus = 2;
+                } else if (focus == 2) {
+                    mButtonSave.requestFocus();
+                    focus = 3;
+                } else if (focus == 3) {
                     isValidateAddContactToList();
-                }if (newView!= null && newView.getId() != R.id.button_cancel) {
+                } else if (focus == 4) {
                     finish();
                 }
                 return true;
@@ -139,6 +146,39 @@ public class AddContactActivity extends AppCompatActivity {
                 //END CALL
                 finish();
                 return true;
+            case KeyEvent.KEYCODE_DPAD_DOWN: {
+                if (focus == 1) {
+                    mEditNumber.requestFocus();
+                    focus = 2;
+                } else if (focus == 2) {
+                    mButtonSave.requestFocus();
+                    focus = 3;
+                } else if (focus == 3) {
+                    mButtonCancel.requestFocus();
+                    focus = 4;
+                } else if (focus == 4) {
+                    mEditName.requestFocus();
+                    focus = 1;
+                }
+            }
+            return true;
+            case KeyEvent.KEYCODE_DPAD_UP: {
+//                Toast.makeText(getApplicationContext(), "up "+focus, Toast.LENGTH_SHORT).show();
+                if (focus == 1) {
+                    mButtonCancel.requestFocus();
+                    focus = 4;
+                } else if (focus == 2) {
+                    mEditName.requestFocus();
+                    focus = 1;
+                } else if (focus == 3) {
+                    mEditNumber.requestFocus();
+                    focus = 2;
+                } else if (focus == 4) {
+                    mButtonSave.requestFocus();
+                    focus = 3;
+                }
+            }
+            return true;
             default:
                 return super.onKeyUp(keyCode, event);
         }

@@ -50,11 +50,11 @@ public class SplashScreen extends AppCompatActivity {
                 }
             }
         }
-      /*  //For testing data purpose
+        //For testing data purpose
         DEVICE_ID = "IMEI:125945689545497";
         sessionManager.setDeviceId(DEVICE_ID);
         sessionManager.setRefreshToken(REFRESH_TOKEN);
-*/
+
     }
 
     @Override

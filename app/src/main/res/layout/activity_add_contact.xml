@@ -46,10 +46,7 @@
                         android:inputType="text"
                         android:maxLength="30"
                         android:imeOptions="actionNext"
-                        android:nextFocusUp="@+id/button_cancel"
-                        android:nextFocusDown="@+id/text_input_number"
-                        android:nextFocusForward="@+id/text_input_number"
-                        android:nextFocusRight="@+id/text_input_number"
+                        android:singleLine="true"
                         android:textColor="@color/colorNormal"
                         android:textSize="@dimen/text_normal_mid_size" />
             </LinearLayout>
@@ -73,12 +70,9 @@
                         android:layout_height="wrap_content"
                         android:hint="@string/enter_number"
                         android:inputType="phone"
+                        android:singleLine="true"
                         android:maxLength="15"
                         android:imeOptions="actionNext"
-                        android:nextFocusUp="@+id/text_input_name"
-                        android:nextFocusDown="@+id/button_save"
-                        android:nextFocusRight="@+id/button_save"
-                        android:nextFocusForward="@+id/button_save"
                         android:textColor="@color/colorNormal"
                         android:textSize="@dimen/text_normal_mid_size" />
 
@@ -103,36 +97,13 @@
             android:gravity="center"
             android:orientation="horizontal">
 
-<!--            <ImageView-->
-<!--                android:layout_width="@dimen/icon_text"-->
-<!--                android:layout_height="@dimen/icon_text"-->
-<!--                android:layout_centerVertical="true"-->
-<!--                android:padding="@dimen/half_space"-->
-<!--                android:src="@drawable/ic_save_white" />-->
-<!--            -->
-<!--            <TextView-->
-<!--                android:id="@+id/text_save"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:gravity="left|center_vertical"-->
-<!--                android:padding="@dimen/half_space"-->
-<!--                android:text="@string/save"-->
-<!--                android:textColor="@color/colorWhite"-->
-<!--                android:textAllCaps="true"-->
-<!--                android:textSize="@dimen/text_normal_size"-->
-<!--                android:textStyle="bold" />-->
-
             <Button
                 android:id="@+id/button_save"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="left|center_vertical"
                 android:padding="@dimen/half_space"
-                android:nextFocusUp="@+id/text_input_number"
-                android:nextFocusDown="@+id/button_cancel"
-                android:nextFocusForward="@+id/button_cancel"
                 android:text="@string/save"
-                android:imeOptions="actionDone"
                 android:textColor="@color/colorWhite"
                 android:textAllCaps="true"
                 android:drawableLeft="@drawable/ic_save_white"
@@ -152,35 +123,12 @@
             android:gravity="center"
             android:orientation="horizontal">
 
-<!--            <ImageView-->
-<!--                android:layout_width="@dimen/icon_text"-->
-<!--                android:layout_height="@dimen/icon_text"-->
-<!--                android:layout_centerVertical="true"-->
-<!--                android:padding="@dimen/half_space"-->
-<!--                android:src="@drawable/ic_cancel_white" />-->
-
-<!--            <TextView-->
-<!--                android:id="@+id/text_cancel"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:gravity="right|center_vertical"-->
-<!--                android:maxLength="15"-->
-<!--                android:padding="@dimen/half_space"-->
-<!--                android:text="@string/cancel"-->
-<!--                android:textAllCaps="true"-->
-<!--                android:textColor="@color/colorWhite"-->
-<!--                android:textSize="@dimen/text_normal_size"-->
-<!--                android:textStyle="bold" />-->
-
             <Button
                 android:id="@+id/button_cancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="left|center_vertical"
                 android:padding="@dimen/half_space"
-                android:nextFocusUp="@+id/button_save"
-                android:nextFocusDown="@+id/text_input_name"
-                android:nextFocusForward="@+id/text_input_name"
                 android:text="@string/cancel"
                 android:textColor="@color/colorWhite"
                 android:textAllCaps="true"
