@@ -35,19 +35,19 @@ public class DBManager {
     }
 
     public void insert(String name, String number) {
-        database.beginTransaction();
+//        database.beginTransaction();
         ContentValues contentValue = new ContentValues();
         contentValue.put(DatabaseHelper.OWNERNAME, name);
         contentValue.put(DatabaseHelper.OWNERNUMBER, number);
         database.insert(DatabaseHelper.TABLE_NAME, null, contentValue);
-        database.endTransaction();
+//        database.endTransaction();
     }
 
     // 1. MissCall
     // 2. incoming
     // 3. outgoing
     public void insertHistory(int type, String name, String number, String callDate, String callTime) {
-        database.beginTransaction();
+//        database.beginTransaction();
         ContentValues contentValue = new ContentValues();
         contentValue.put(DatabaseHelper.CALLTYPE, type);
         contentValue.put(DatabaseHelper.OWNERNAME, name);
@@ -55,7 +55,7 @@ public class DBManager {
         contentValue.put(DatabaseHelper.CONTACTDATE, callDate);
         contentValue.put(DatabaseHelper.CONTACTTIME, callTime);
         database.insert(DatabaseHelper.TABLE_HISTORY_NAME, null, contentValue);
-        database.endTransaction();
+//        database.endTransaction();
     }
 
     public ArrayList<ContactListItemModel> getContactListItem() {
@@ -111,34 +111,34 @@ public class DBManager {
     }
 
     public int updateHistory(String name, String newName) {
-        database.beginTransaction();
+//        database.beginTransaction();
         ContentValues contentValues = new ContentValues();
         contentValues.put(DatabaseHelper.OWNERNAME, newName);
         int i = database.update(DatabaseHelper.TABLE_HISTORY_NAME, contentValues, DatabaseHelper.OWNERNAME + " = ?", new String[]{name});
-        database.endTransaction();
+//        database.endTransaction();
         return i;
     }
 
     public int update(long _id, String name, String number) {
-        database.beginTransaction();
+//        database.beginTransaction();
         ContentValues contentValues = new ContentValues();
         contentValues.put(DatabaseHelper._ID, _id);
         contentValues.put(DatabaseHelper.OWNERNAME, name);
         contentValues.put(DatabaseHelper.OWNERNUMBER, number);
         int i = database.update(DatabaseHelper.TABLE_NAME, contentValues, DatabaseHelper._ID + " = " + _id, null);
-        database.endTransaction();
+//        database.endTransaction();
         return i;
     }
 
     public void deleteHistory(long _id) {
-        database.beginTransaction();
+//        database.beginTransaction();
         database.delete(DatabaseHelper.TABLE_HISTORY_NAME, DatabaseHelper._ID + "=" + _id, null);
-        database.endTransaction();
+//        database.endTransaction();
     }
 
     public void delete(long _id) {
-        database.beginTransaction();
+//        database.beginTransaction();
         database.delete(DatabaseHelper.TABLE_NAME, DatabaseHelper._ID + "=" + _id, null);
-        database.endTransaction();
+//        database.endTransaction();
     }
 }
