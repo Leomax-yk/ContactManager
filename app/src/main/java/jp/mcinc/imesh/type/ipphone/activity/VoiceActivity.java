@@ -488,6 +488,8 @@ public class VoiceActivity extends AppCompatActivity {
     private void rejectIncomingCall() {
         SoundPoolManager.getInstance(VoiceActivity.this).stopRinging();
         if (activeCallInvite != null) {
+            Date date = new Date();
+            dbManager.insertHistory(1, "UNKNOWN", activeCallInvite.getFrom(), "" + DateFormat.getDateInstance(DateFormat.MEDIUM).format(date), "" + DateFormat.getTimeInstance().format(date));
             mLinearOutgoing.setVisibility(View.GONE);
             mLinearIncoming.setVisibility(View.GONE);
             mRelativelayout.setVisibility(View.VISIBLE);
@@ -657,6 +659,8 @@ public class VoiceActivity extends AppCompatActivity {
     private void answer() {
         SoundPoolManager.getInstance(this).stopRinging();
         activeCallInvite.accept(this, callListener);
+        Date date = new Date();
+        dbManager.insertHistory(2, "UNKNOWN", activeCallInvite.getFrom(), "" + DateFormat.getDateInstance(DateFormat.MEDIUM).format(date), "" + DateFormat.getTimeInstance().format(date));
         notificationManager.cancel(activeCallNotificationId);
         setCallUI();
         if (alertDialog != null && alertDialog.isShowing()) {
