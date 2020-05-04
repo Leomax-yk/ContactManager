@@ -52,11 +52,13 @@
 
         </activity>
 
-        <receiver android:name=".broadcast.RefreshBroadCast">
-            <intent-filter>
-                <action android:name="jp.mcinc.imesh.type.ipphone.action.SEND_DATA"/>
-            </intent-filter>
-        </receiver>
+<!--        <receiver android:name=".broadcast.VoiceIncomingBroadCast">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="ACTION_INCOMING_CALL"/>-->
+<!--                <action android:name="ACTION_CANCEL_CALL"/>-->
+<!--                <action android:name="ACTION_FCM_TOKEN"/>-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
 
         <receiver android:name=".broadcast.BootCompleteBroadCast">
             <intent-filter>

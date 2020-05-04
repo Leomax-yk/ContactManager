@@ -120,13 +120,8 @@ public class VoiceActivity extends AppCompatActivity {
     private boolean isReceiverRegistered = false;
     private VoiceBroadcastReceiver voiceBroadcastReceiver;
 
-    // Empty HashMap, never populated for the Quickstart
     HashMap<String, String> params = new HashMap<>();
 
-    //    private FloatingActionButton callActionFab;
-//    private FloatingActionButton hangupActionFab;
-//    private FloatingActionButton holdActionFab;
-//    private FloatingActionButton muteActionFab;
     private Chronometer chronometer;
 
     private NotificationManager notificationManager;
@@ -967,23 +962,21 @@ public class VoiceActivity extends AppCompatActivity {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-            case KeyEvent.KEYCODE_CLEAR:
-                //CLEAR
-                //BACK
-                if (mEditNumber != null && mEditNumber.length() > 0) {
-                    mEditNumber.setText("" + mEditNumber.getText().toString().substring(0, mEditNumber.length() - 1));
-                    mEditNumber.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mEditNumber.setSelection(mEditNumber.getText().length());
-                        }
-                    });
-                } else {
-                    finish();
-                }
-                return true;
-
+            //Just check if this is working for small device if not clearing text
+//            case KeyEvent.KEYCODE_CLEAR:
+//                //CLEAR
+//                if (mEditNumber != null && mEditNumber.length() > 0) {
+//                    mEditNumber.setText("" + mEditNumber.getText().toString().substring(0, mEditNumber.length() - 1));
+//                    mEditNumber.post(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            mEditNumber.setSelection(mEditNumber.getText().length());
+//                        }
+//                    });
+//                } else {
+//                    finish();
+//                }
+//                return true;
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 if(focus == 1){
                     acceptIncomingCall();
