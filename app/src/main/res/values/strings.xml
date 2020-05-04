@@ -34,4 +34,6 @@
     <string name="select_phone_number_for_purchase">Select phone number for purchase</string>
     <string name="no_number_available">NO NUMBER AVAILABLE</string>
     <string name="cancel_this_phone_number">Cancel this Phone Number</string>
+    <string name="mute_unmute">Mute/UnMute</string>
+    <string name="speaker">Speaker</string>
 </resources>

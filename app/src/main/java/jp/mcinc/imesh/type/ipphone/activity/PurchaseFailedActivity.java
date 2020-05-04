@@ -17,7 +17,7 @@ public class PurchaseFailedActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_purchase_success);
+        setContentView(R.layout.activity_purchase_failed);
         getSupportActionBar().hide();
         sessionManager = new SessionManager(this);
         mTextDeleteInfo = findViewById(R.id.text_delete_info);
