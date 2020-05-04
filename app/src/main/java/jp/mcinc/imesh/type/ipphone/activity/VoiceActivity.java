@@ -108,6 +108,7 @@ public class VoiceActivity extends AppCompatActivity {
      * If your token server is written in PHP, TWILIO_ACCESS_TOKEN_SERVER_URL needs .php extension at the end.
      *
      * For example : https://myurl.io/accessToken.php
+     * praveen deshmane
      */
     private static final String TWILIO_REGISTRATION_URL = "https://toolbox-gnat-5377.twil.io/register-binding";
     private static final String TWILIO_ACCESS_TOKEN_SERVER_URL = "TWILIO_ACCESS_TOKEN_SERVER_URL";
