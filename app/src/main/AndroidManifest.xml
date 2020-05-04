@@ -33,7 +33,18 @@
             android:screenOrientation="locked">
 
         </activity>
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.SplashScreen"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
 
+        </activity>
+        <activity
+            android:name="jp.mcinc.imesh.type.ipphone.activity.PurchaseFailedActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="locked">
+
+        </activity>
         <activity
             android:name="jp.mcinc.imesh.type.ipphone.activity.AddContactActivity"
             android:label="@string/app_name"

@@ -75,32 +75,13 @@ public class VoiceFirebaseMessagingService extends FirebaseMessagingService {
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         String identity =  intent.getStringExtra(IDENTITY);
         Log.e(TAG, "onNewToken: ");
-//        String storedIdentity = sharedPreferences.getString(IDENTITY, null);
-//        if (newIdentity == null) {
-//            // If no identity was provided to us then we use the identity stored in shared preferences.
-//            // This can occur when the registration token changes.
-//            identity = storedIdentity;
-//        } else {
-//            // Otherwise we save the new identity in the shared preferences for future use.
-//            sharedPreferences.edit().putString(IDENTITY, binding.identity).commit();
-//        }
-//        sendRegistrationToServer(identity, token);
-
     }
-//    private CreateBindingResponse sendRegistrationToServer(String identity, String token) throws IOException {
-//        String endpoint = sharedPreferences.getString(ENDPOINT + newIdentity, null);
-//        ScriptGroup.Binding binding = new ScriptGroup.Binding(identity, endpoint, token, "fcm");
-//        Call<CreateBindingResponse> call = bindingResource.createBinding(binding);
-//        Response<CreateBindingResponse> response = call.execute();
-//        sharedPreferences.edit().putString(ENDPOINT + binding.identity, response.body().endpoint).commit();
-//    }
 
     private void handleInvite(CallInvite callInvite, int notificationId) {
         Intent intent = new Intent(this, IncomingCallNotificationService.class);
         intent.setAction(Constants.ACTION_INCOMING_CALL);
         intent.putExtra(Constants.INCOMING_CALL_NOTIFICATION_ID, notificationId);
         intent.putExtra(Constants.INCOMING_CALL_INVITE, callInvite);
-
         startService(intent);
     }
 

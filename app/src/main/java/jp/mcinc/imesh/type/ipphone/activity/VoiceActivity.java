@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.InputType;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -144,12 +145,14 @@ public class VoiceActivity extends AppCompatActivity {
 
     private RelativeLayout mRelativelayout;
     private EditText mEditNumber;
-    private Button mButtonCall;
+    private Button mButtonCall, mButtonAccept, mButtonReject;
     private DBManager dbManager;
 
-    private TextView mTextName, mTextNumber, mTextStatus;
-    private LinearLayout mLinearStatus, mLinearDetails, mLinearDailing;
+    private TextView mTextName, mTextNumber, mTextStatus, mTextIncomingNumber, mTextIncomingTitle;
+    private LinearLayout mLinearStatus, mLinearDetails, mLinearOutgoing, mLinearIncoming;
     private boolean makePhoneCallNumber = false;
+    private CallInvite callInvite;
+    private int focus = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,17 +171,30 @@ public class VoiceActivity extends AppCompatActivity {
         mRelativelayout = findViewById(R.id.relative_dail);
         chronometer = findViewById(R.id.chronometer);
         mButtonCall = findViewById(R.id.button_call);
+        mButtonAccept = findViewById(R.id.button_accept);
+        mButtonReject = findViewById(R.id.button_reject);
         mEditNumber = findViewById(R.id.edit_number);
 
         mTextName = findViewById(R.id.text_name);
         mTextNumber = findViewById(R.id.text_number);
         mTextStatus = findViewById(R.id.text_status);
 
+        mTextIncomingNumber = findViewById(R.id.text_incoming_number);
+        mTextIncomingTitle = findViewById(R.id.text_incoming_title);
+
         mLinearStatus = findViewById(R.id.linear_details);
         mLinearDetails = findViewById(R.id.linear_status);
-        mLinearDailing = findViewById(R.id.linear_dailing);
+        mLinearOutgoing = findViewById(R.id.linear_dailing);
+        mLinearIncoming = findViewById(R.id.linear_incoming);
 
-        mLinearDailing.setVisibility(View.GONE);
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int dpi = metrics.densityDpi;
+        dpi = dpi - 8;
+        dpi = dpi / 2;
+        mButtonAccept.setPadding(dpi, 0, 0, 0);
+        mButtonReject.setPadding(dpi, 0, 0, 0);
+
+        mLinearOutgoing.setVisibility(View.GONE);
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         /*
@@ -269,7 +285,7 @@ public class VoiceActivity extends AppCompatActivity {
                 mTextStatus.setText("Dailing");
                 mTextName.setText("UNKNOWN");
                 mTextNumber.setText(mEditNumber.getText().toString());
-          //      mTextNumber.setText("+817021908616");
+                //      mTextNumber.setText("+817021908616");
                 Snackbar.make(mRelativelayout, "DAILING", Snackbar.LENGTH_LONG).show();
                 /*
                  * When [answerOnBridge](https://www.twilio.com/docs/voice/twiml/dial#answeronbridge)
@@ -288,6 +304,9 @@ public class VoiceActivity extends AppCompatActivity {
                 Constants.sendCallEndBroadcast(getApplicationContext());
                 setAudioFocus(false);
                 Snackbar.make(mRelativelayout, "CONNECTION FAILED", Snackbar.LENGTH_LONG).show();
+                mLinearOutgoing.setVisibility(View.GONE);
+                mLinearIncoming.setVisibility(View.GONE);
+                mRelativelayout.setVisibility(View.VISIBLE);
                 if (BuildConfig.playCustomRingback) {
                     SoundPoolManager.getInstance(VoiceActivity.this).stopRinging();
                 }
@@ -308,8 +327,10 @@ public class VoiceActivity extends AppCompatActivity {
                 Snackbar.make(mRelativelayout, "CONNECTED", Snackbar.LENGTH_LONG).show();
                 mTextStatus.setText("Connected");
                 mTextName.setText("UNKNOWN");
+                mLinearIncoming.setVisibility(View.GONE);
+                mRelativelayout.setVisibility(View.GONE);
                 //mTextNumber.setText("+817021908616");
-                mTextNumber.setText( mEditNumber.getText().toString());
+                mTextNumber.setText(mEditNumber.getText().toString());
                 setAudioFocus(true);
                 if (BuildConfig.playCustomRingback) {
                     SoundPoolManager.getInstance(VoiceActivity.this).stopRinging();
@@ -324,8 +345,8 @@ public class VoiceActivity extends AppCompatActivity {
                 Log.d(TAG, "onReconnecting");
                 mTextStatus.setText("Reconnecting");
                 mTextName.setText("UNKNOWN");
-              //  mTextNumber.setText("+817021908616");
-                mTextNumber.setText( mEditNumber.getText().toString());
+                //  mTextNumber.setText("+817021908616");
+                mTextNumber.setText(mEditNumber.getText().toString());
             }
 
             @Override
@@ -335,8 +356,8 @@ public class VoiceActivity extends AppCompatActivity {
                 Log.d(TAG, "onReconnected");
                 mTextStatus.setText("Reconnected");
                 mTextName.setText("UNKNOWN");
-               // mTextNumber.setText("+817021908616");
-                mTextNumber.setText( mEditNumber.getText().toString());
+                // mTextNumber.setText("+817021908616");
+                mTextNumber.setText(mEditNumber.getText().toString());
             }
 
             @Override
@@ -345,9 +366,9 @@ public class VoiceActivity extends AppCompatActivity {
                 Snackbar.make(mRelativelayout, "DISCONNECTED", Snackbar.LENGTH_LONG).show();
                 mTextStatus.setText("Disconnected");
                 mTextName.setText("UNKNOWN");
-//                mTextNumber.setText("+817021908616");
-                mTextNumber.setText( mEditNumber.getText().toString());
-
+                mTextNumber.setText(mEditNumber.getText().toString());
+                mLinearIncoming.setVisibility(View.GONE);
+                mRelativelayout.setVisibility(View.VISIBLE);
                 setAudioFocus(false);
                 if (BuildConfig.playCustomRingback) {
                     SoundPoolManager.getInstance(VoiceActivity.this).stopRinging();
@@ -369,14 +390,14 @@ public class VoiceActivity extends AppCompatActivity {
 
     private void makePhoneCall() {
         if (!sessionManager.isCallImeshStart()) {
-            params.put("to",mEditNumber.getText().toString());
+            params.put("to", mEditNumber.getText().toString());
             ConnectOptions connectOptions = new ConnectOptions.Builder(mAccessToken)
                     .params(params)
                     .build();
             activeCall = Voice.connect(VoiceActivity.this, connectOptions, callListener);
             setCallUI();
             sessionManager.setCallStart(true);
-        }else{
+        } else {
             showToast("Cannot make a Call");
         }
     }
@@ -394,7 +415,7 @@ public class VoiceActivity extends AppCompatActivity {
      * The UI state when there is an active call
      */
     private void setCallUI() {
-        mLinearDailing.setVisibility(View.VISIBLE);
+        mLinearOutgoing.setVisibility(View.VISIBLE);
         mRelativelayout.setVisibility(View.GONE);
         chronometer.setVisibility(View.VISIBLE);
         chronometer.setBase(SystemClock.elapsedRealtime());
@@ -405,7 +426,7 @@ public class VoiceActivity extends AppCompatActivity {
      * Reset UI elements
      */
     private void resetUI() {
-        mLinearDailing.setVisibility(View.GONE);
+        mLinearOutgoing.setVisibility(View.GONE);
         chronometer.setVisibility(View.INVISIBLE);
         chronometer.stop();
         mRelativelayout.setVisibility(View.VISIBLE);
@@ -429,6 +450,21 @@ public class VoiceActivity extends AppCompatActivity {
                 isValidateAddContactToList();
             }
         });
+
+        mButtonAccept.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                focus = 1;
+                acceptIncomingCall();
+            }
+        });
+        mButtonReject.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                focus = 2;
+                rejectIncomingCall();
+            }
+        });
         /*
          * Ensure the microphone permission is enabled
          */
@@ -438,6 +474,28 @@ public class VoiceActivity extends AppCompatActivity {
             refershToken();
         }
         registerReceiver();
+    }
+
+    private void acceptIncomingCall() {
+        Intent acceptIntent = new Intent(getApplicationContext(), IncomingCallNotificationService.class);
+        acceptIntent.setAction(Constants.ACTION_ACCEPT);
+        acceptIntent.putExtra(Constants.INCOMING_CALL_INVITE, activeCallInvite);
+        acceptIntent.putExtra(Constants.INCOMING_CALL_NOTIFICATION_ID, activeCallNotificationId);
+        Log.d(TAG, "Clicked accept startService");
+        startService(acceptIntent);
+    }
+
+    private void rejectIncomingCall() {
+        SoundPoolManager.getInstance(VoiceActivity.this).stopRinging();
+        if (activeCallInvite != null) {
+            mLinearOutgoing.setVisibility(View.GONE);
+            mLinearIncoming.setVisibility(View.GONE);
+            mRelativelayout.setVisibility(View.VISIBLE);
+            Intent intent = new Intent(VoiceActivity.this, IncomingCallNotificationService.class);
+            intent.setAction(Constants.ACTION_REJECT);
+            intent.putExtra(Constants.INCOMING_CALL_INVITE, activeCallInvite);
+            startService(intent);
+        }
     }
 
     @Override
@@ -457,12 +515,14 @@ public class VoiceActivity extends AppCompatActivity {
             String action = intent.getAction();
             activeCallInvite = intent.getParcelableExtra(Constants.INCOMING_CALL_INVITE);
             activeCallNotificationId = intent.getIntExtra(Constants.INCOMING_CALL_NOTIFICATION_ID, 0);
+
             if (intent.hasExtra("num")) {
                 mEditNumber.setText("" + intent.getExtras().getString("num"));
                 if (intent.hasExtra("call")) {
                     makePhoneCallNumber = intent.getExtras().getBoolean("call");
                 }
             }
+
             switch (action) {
                 case Constants.ACTION_INCOMING_CALL:
                     handleIncomingCall();
@@ -527,8 +587,6 @@ public class VoiceActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action != null && (action.equals(Constants.ACTION_INCOMING_CALL) || action.equals(Constants.ACTION_CANCEL_CALL))) {
-
-
                 /*
                  * Handle the incoming or cancelled call invite
                  */
@@ -537,47 +595,36 @@ public class VoiceActivity extends AppCompatActivity {
         }
     }
 
-    private DialogInterface.OnClickListener answerCallClickListener() {
-        return (dialog, which) -> {
-            Log.d(TAG, "Clicked accept");
-            Intent acceptIntent = new Intent(getApplicationContext(), IncomingCallNotificationService.class);
-            acceptIntent.setAction(Constants.ACTION_ACCEPT);
-            acceptIntent.putExtra(Constants.INCOMING_CALL_INVITE, activeCallInvite);
-            acceptIntent.putExtra(Constants.INCOMING_CALL_NOTIFICATION_ID, activeCallNotificationId);
-            Log.d(TAG, "Clicked accept startService");
-            startService(acceptIntent);
-        };
-    }
+//    private DialogInterface.OnClickListener answerCallClickListener() {
+//        return (dialog, which) -> {
+//            Log.d(TAG, "Clicked accept");
+//            acceptIncomingCall();
+//        };
+//    }
 
-    private DialogInterface.OnClickListener callClickListener() {
-        return (dialog, which) -> {
-            // Place a call
-            EditText contact = ((AlertDialog) dialog).findViewById(R.id.contact);
-    //        params.put("to", "+817021908616");
-            params.put("to",mEditNumber.getText().toString());
-            ConnectOptions connectOptions = new ConnectOptions.Builder(mAccessToken)
-                    .params(params)
-                    .build();
-            activeCall = Voice.connect(VoiceActivity.this, connectOptions, callListener);
-            setCallUI();
-            alertDialog.dismiss();
-        };
-    }
+//    private DialogInterface.OnClickListener callClickListener() {
+//        return (dialog, which) -> {
+//            // Place a call
+//            EditText contact = ((AlertDialog) dialog).findViewById(R.id.contact);
+//    //        params.put("to", "+817021908616");
+//            params.put("to",mEditNumber.getText().toString());
+//            ConnectOptions connectOptions = new ConnectOptions.Builder(mAccessToken)
+//                    .params(params)
+//                    .build();
+//            activeCall = Voice.connect(VoiceActivity.this, connectOptions, callListener);
+//            setCallUI();
+//            alertDialog.dismiss();
+//        };
+//    }
 
-    private DialogInterface.OnClickListener cancelCallClickListener() {
-        return (dialogInterface, i) -> {
-            SoundPoolManager.getInstance(VoiceActivity.this).stopRinging();
-            if (activeCallInvite != null) {
-                Intent intent = new Intent(VoiceActivity.this, IncomingCallNotificationService.class);
-                intent.setAction(Constants.ACTION_REJECT);
-                intent.putExtra(Constants.INCOMING_CALL_INVITE, activeCallInvite);
-                startService(intent);
-            }
-            if (alertDialog != null && alertDialog.isShowing()) {
-                alertDialog.dismiss();
-            }
-        };
-    }
+//    private DialogInterface.OnClickListener cancelCallClickListener() {
+//        return (dialogInterface, i) -> {
+//            rejectIncomingCall();
+//            if (alertDialog != null && alertDialog.isShowing()) {
+//                alertDialog.dismiss();
+//            }
+//        };
+//    }
 
     public static AlertDialog createIncomingCallDialog(
             Context context,
@@ -602,30 +649,6 @@ public class VoiceActivity extends AppCompatActivity {
             Log.i(TAG, "Registering with FCM");
             Voice.register(mAccessToken, Voice.RegistrationChannel.FCM, fcmToken, registrationListener);
         });
-    }
-
-    private View.OnClickListener callActionFabClickListener() {
-        return v -> {
-            alertDialog = createCallDialog(callClickListener(), cancelCallClickListener(), VoiceActivity.this);
-            alertDialog.show();
-        };
-    }
-
-    private View.OnClickListener hangupActionFabClickListener() {
-        return v -> {
-            SoundPoolManager.getInstance(VoiceActivity.this).playDisconnect();
-            resetUI();
-            disconnect();
-
-        };
-    }
-
-    private View.OnClickListener holdActionFabClickListener() {
-        return v -> hold();
-    }
-
-    private View.OnClickListener muteActionFabClickListener() {
-        return v -> mute();
     }
 
     /*
@@ -655,7 +678,6 @@ public class VoiceActivity extends AppCompatActivity {
         if (activeCall != null) {
             boolean hold = !activeCall.isOnHold();
             activeCall.hold(hold);
-//            applyFabState(holdActionFab, hold);
         }
     }
 
@@ -663,18 +685,7 @@ public class VoiceActivity extends AppCompatActivity {
         if (activeCall != null) {
             boolean mute = !activeCall.isMuted();
             activeCall.mute(mute);
-//            applyFabState(muteActionFab, mute);
         }
-    }
-
-    private void applyFabState(FloatingActionButton button, boolean enabled) {
-        // Set fab as pressed when call is on hold
-        ColorStateList colorStateList = enabled ?
-                ColorStateList.valueOf(ContextCompat.getColor(this,
-                        R.color.colorPrimaryDark)) :
-                ColorStateList.valueOf(ContextCompat.getColor(this,
-                        R.color.colorAccent));
-        button.setBackgroundTintList(colorStateList);
     }
 
     private void setAudioFocus(boolean setFocus) {
@@ -797,11 +808,13 @@ public class VoiceActivity extends AppCompatActivity {
     private void showIncomingCallDialog() {
         SoundPoolManager.getInstance(this).playRinging();
         if (activeCallInvite != null) {
-            alertDialog = createIncomingCallDialog(VoiceActivity.this,
-                    activeCallInvite,
-                    answerCallClickListener(),
-                    cancelCallClickListener());
-            alertDialog.show();
+            focus = 1;
+            mButtonAccept.requestFocus();
+            mLinearOutgoing.setVisibility(View.GONE);
+            mRelativelayout.setVisibility(View.GONE);
+            mLinearIncoming.setVisibility(View.VISIBLE);
+            mTextIncomingTitle.setText("Incoming Call");
+            mTextIncomingNumber.setText(activeCallInvite.getFrom() + " is calling.");
         }
     }
 
@@ -925,7 +938,7 @@ public class VoiceActivity extends AppCompatActivity {
 
     private void isValidateAddContactToList() {
         if (Validation.validateString(mEditNumber.getText().toString()) && Validation.isMobileNumberValid(mEditNumber.getText().toString())) {
-            mLinearDailing.setVisibility(View.VISIBLE);
+            mLinearOutgoing.setVisibility(View.VISIBLE);
             makeCall("CALL");
         } else {
             Toast.makeText(getApplicationContext(), "Enter mobile number properly", Toast.LENGTH_SHORT).show();
@@ -935,7 +948,7 @@ public class VoiceActivity extends AppCompatActivity {
     public void makeCall(String number) {
         if (!makePhoneCallNumber) {
             Date date = new Date();
-           // dbManager.insertHistory(3, "UNKNOWN", "+817021908616", "" + DateFormat.getDateInstance(DateFormat.MEDIUM).format(date), "" + DateFormat.getTimeInstance().format(date));
+            // dbManager.insertHistory(3, "UNKNOWN", "+817021908616", "" + DateFormat.getDateInstance(DateFormat.MEDIUM).format(date), "" + DateFormat.getTimeInstance().format(date));
             dbManager.insertHistory(3, "UNKNOWN", mEditNumber.getText().toString(), "" + DateFormat.getDateInstance(DateFormat.MEDIUM).format(date), "" + DateFormat.getTimeInstance().format(date));
 
         }
@@ -960,6 +973,24 @@ public class VoiceActivity extends AppCompatActivity {
                     finish();
                 }
                 return true;
+
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                if(focus == 1){
+                    acceptIncomingCall();
+                } else if(focus == 2){
+                    rejectIncomingCall();
+                }
+                return true;
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+            case KeyEvent.KEYCODE_DPAD_UP:
+                if(focus == 1){
+                    focus = 2;
+                    mButtonReject.requestFocus();
+                } else if(focus == 2){
+                    focus = 1;
+                    mButtonAccept.requestFocus();
+                }
+                return  true;
             case KeyEvent.KEYCODE_CALL:
                 //PICK CALL
                 isValidateAddContactToList();

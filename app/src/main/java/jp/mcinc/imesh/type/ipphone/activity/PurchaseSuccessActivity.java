@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.widget.TextView;
 
+import jp.mcinc.imesh.type.ipphone.MainActivity;
 import jp.mcinc.imesh.type.ipphone.R;
 import jp.mcinc.imesh.type.ipphone.session.SessionManager;
 
@@ -33,7 +34,8 @@ public class PurchaseSuccessActivity extends AppCompatActivity {
             public void run() {
                 //Do something after 100ms
                 sessionManager.setPurchase(true);
-                Intent i = new Intent(PurchaseSuccessActivity.this, ContactListActivity.class);
+                Intent i = new Intent(PurchaseSuccessActivity.this, MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(i);
                 finish();
             }

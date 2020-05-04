@@ -15,6 +15,7 @@
     <string name="cancel_waiting_message">電話番号は現在キャンセル中です。キャンセルには数日かかる場合があります。</string>
     <string name="do_you_want_to_puchase_this_number">この番号を購入しますか</string>
     <string name="successfully_purchase_this_number">この番号を購入しました</string>
+    <string name="failed_purchase_this_number">Failed to purchase \nthis number</string>
     <string name="are_you_sure_to_cancel_this_number">この番号をキャンセルしますか</string>
     <string name="cancelled_sucessfully">\n 正常にキャンセルされました</string>
     <string name="save">保存</string>

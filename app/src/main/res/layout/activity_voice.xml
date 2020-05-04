@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinator_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical"
     tools:context="jp.mcinc.imesh.type.ipphone.activity.VoiceActivity">
 
     <LinearLayout
         android:id="@+id/linear_dailing"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        android:layout_height="172dp"
         android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/linear_status"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/icon_size_big"
             android:gravity="center_horizontal"
             android:layout_marginTop="@dimen/space"
             android:orientation="vertical">
@@ -43,7 +42,7 @@
             android:id="@+id/linear_details"
             android:layout_width="match_parent"
             android:layout_marginTop="@dimen/half_space"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/icon_size"
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
@@ -53,7 +52,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/text_normal_small_size"
                 android:textStyle="bold"
-                android:text=""/>
+                android:text="NAME"/>
 
             <TextView
                 android:id="@+id/text_number"
@@ -61,24 +60,80 @@
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/text_normal_small_size"
                 android:textStyle="bold"
-                android:text=""/>
+                android:text="NUMBER"/>
         </LinearLayout>
 
         <Chronometer
             android:id="@+id/chronometer"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/icon_size_small"
             android:layout_gravity="top|center"
-            android:layout_marginTop="@dimen/padding"
+            android:layout_marginTop="@dimen/space"
             android:textColor="@color/colorAccent"
             android:textSize="30sp"
             android:visibility="invisible" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/linear_incoming"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_centerVertical="true"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text_incoming_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_normal_small_size"
+            android:textStyle="bold"
+            android:text="NAME"/>
+
+        <ImageView
+            android:layout_width="@dimen/icon_text"
+            android:layout_height="@dimen/icon_text"
+            android:layout_margin="@dimen/half_space"
+            android:src="@drawable/ic_call_black_24dp"/>
+
+        <TextView
+            android:id="@+id/text_incoming_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_normal_small_size"
+            android:textStyle="bold"
+            android:text="NAME"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_accept"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/ic_call"
+                android:drawableTint="@color/colorWhite"
+                android:background="@color/colorSave"
+                android:layout_height="wrap_content"/>
+
+            <Button
+                android:id="@+id/button_reject"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/ic_call_end_white_24dp"
+                android:drawableTint="@color/colorWhite"
+                android:background="@color/colorSaveReject"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </LinearLayout>
+
     <RelativeLayout
         android:id="@+id/relative_dail"
         android:layout_width="match_parent"
-        android:visibility="gone"
+        android:layout_centerVertical="true"
         android:layout_height="match_parent">
 
         <Button
@@ -111,5 +166,7 @@
         </LinearLayout>
 
     </RelativeLayout>
-</LinearLayout>
+
+
+</RelativeLayout>
 

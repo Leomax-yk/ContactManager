@@ -98,7 +98,8 @@ public class ContactListActivity extends AppCompatActivity {
         mButtonBack.setPadding(dpi, 0, 0, 0);
         dbManager = new DBManager(this);
         dbManager.open();
-}
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         /*
@@ -241,7 +242,7 @@ public class ContactListActivity extends AppCompatActivity {
         }
     }
 
-    private void showToast(String message){
+    private void showToast(String message) {
         Snackbar.make(mRecyclerView, message, Snackbar.LENGTH_LONG).show();
     }
 
@@ -483,11 +484,11 @@ public class ContactListActivity extends AppCompatActivity {
     }
 
     private void callDailPad(String value) {
-        startActivity(new Intent(ContactListActivity.this, VoiceActivity.class).putExtra("num", "" + value).putExtra("call",false).setAction(Constants.OUTGOING_CALL_INVITE));
+        startActivity(new Intent(ContactListActivity.this, VoiceActivity.class).putExtra("num", "" + value).putExtra("call", false).setAction(Constants.OUTGOING_CALL_INVITE));
     }
 
     private void callNumber(String value) {
-        startActivity(new Intent(ContactListActivity.this, VoiceActivity.class).putExtra("num", "" + value).putExtra("call",true).setAction(Constants.OUTGOING_CALL_INVITE));
+        startActivity(new Intent(ContactListActivity.this, VoiceActivity.class).putExtra("num", "" + value).putExtra("call", true).setAction(Constants.OUTGOING_CALL_INVITE));
     }
 
     private void iJustWantToScroll() {

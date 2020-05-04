@@ -106,9 +106,7 @@ public class PurchaseWaitingSplashActivity extends AppCompatActivity {
                             if (dialog.isShowing()) {
                                 dialog.dismiss();
                             }
-                            Snackbar.make(mTextDeleteInfo, "Purchase Failed", Snackbar.LENGTH_SHORT).show();
-                            Intent i = new Intent(PurchaseWaitingSplashActivity.this, SplashScreen.class);
-                            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            Intent i = new Intent(PurchaseWaitingSplashActivity.this, PurchaseFailedActivity.class);
                             startActivity(i);
                             finish();
                         }
@@ -164,9 +162,7 @@ public class PurchaseWaitingSplashActivity extends AppCompatActivity {
                                 if (dialog.isShowing()) {
                                     dialog.dismiss();
                                 }
-                                Snackbar.make(mTextDeleteInfo, "Purchase Failed", Snackbar.LENGTH_SHORT).show();
-                                Intent i = new Intent(PurchaseWaitingSplashActivity.this, SplashScreen.class);
-                                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                Intent i = new Intent(PurchaseWaitingSplashActivity.this, PurchaseFailedActivity.class);
                                 startActivity(i);
                                 finish();
                             } catch (Exception e) {
@@ -193,11 +189,13 @@ public class PurchaseWaitingSplashActivity extends AppCompatActivity {
     }
 
     private void purchaseNumberSucess(JSONObject jsonObject) throws JSONException {
-        if (jsonObject.has("deviceId"))
+        if (jsonObject.has("deviceId")){
             DEVICE_ID = jsonObject.getString("deviceId");
-        sessionManager.setDeviceId(jsonObject.getString("deviceId"));
-        if (jsonObject.has("phoneNumber"))
+            sessionManager.setDeviceId(jsonObject.getString("deviceId"));
+        }
+        if (jsonObject.has("phoneNumber")){
             sessionManager.setNumber(jsonObject.getString("phoneNumber"));
+        }
         if (jsonObject.has("phoneNumberSid")) {
             sessionManager.setNumberSid(jsonObject.getString("phoneNumberSid"));
             CALL_SID_KEY = sessionManager.getNumberSid();

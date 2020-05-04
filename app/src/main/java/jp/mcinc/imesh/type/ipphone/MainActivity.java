@@ -15,6 +15,7 @@ import androidx.core.app.ActivityCompat;
 
 import jp.mcinc.imesh.type.ipphone.activity.ContactListActivity;
 import jp.mcinc.imesh.type.ipphone.activity.PurchaseWaitingSplashActivity;
+import jp.mcinc.imesh.type.ipphone.services.BackgroundService;
 import jp.mcinc.imesh.type.ipphone.session.SessionManager;
 
 import java.util.Locale;
@@ -50,7 +51,11 @@ public class MainActivity extends AppCompatActivity {
         DEVICE_ID = "IMEI:125945689545497";
         sessionManager.setDeviceId(DEVICE_ID);
         sessionManager.setRefreshToken(REFRESH_TOKEN);
-*/
+        */
+        if(sessionManager.isPurchase()) {
+            Intent backgroundService = new Intent(MainActivity.this, BackgroundService.class);
+            startService(backgroundService);
+        }
     }
 
     @Override
