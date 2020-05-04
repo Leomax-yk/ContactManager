@@ -10,9 +10,12 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+
+import jp.mcinc.imesh.type.ipphone.broadcast.VoiceIncomingBroadCast;
 import jp.mcinc.imesh.type.ipphone.contants.Constants;
 import jp.mcinc.imesh.type.ipphone.model.CreateBindingResponse;
 import jp.mcinc.imesh.type.ipphone.notification.IncomingCallNotificationService;
+import jp.mcinc.imesh.type.ipphone.services.BackgroundService;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -71,10 +74,10 @@ public class VoiceFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(String token) {
         super.onNewToken(token);
-        Intent intent = new Intent(Constants.ACTION_FCM_TOKEN);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-        String identity =  intent.getStringExtra(IDENTITY);
-        Log.e(TAG, "onNewToken: ");
+//        Intent intent = new Intent(Constants.ACTION_FCM_TOKEN);
+//        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+//        String identity =  intent.getStringExtra(IDENTITY);
+        Log.e(TAG, "onNewToken: "+token);
     }
 
     private void handleInvite(CallInvite callInvite, int notificationId) {

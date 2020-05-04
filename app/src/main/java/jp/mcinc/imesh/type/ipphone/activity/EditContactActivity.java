@@ -54,6 +54,13 @@ public class EditContactActivity extends AppCompatActivity {
                 mEditName.requestFocus();
             }
         });
+        mEditName.post(new Runnable() {
+            @Override
+            public void run() {
+                mEditName.setSelection(mEditName.getText().length());
+                mEditName.requestFocus();
+            }
+        });
         //Open Database connection
         dbManager = new DBManager(this);
         dbManager.open();
@@ -115,14 +122,6 @@ public class EditContactActivity extends AppCompatActivity {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                //BACK
-                finish();
-                return true;
-            case KeyEvent.KEYCODE_CLEAR:
-                //CLEAR
-
-                return true;
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 //Center key
                 if (focus == 1) {

@@ -10,14 +10,20 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.twilio.voice.RegistrationException;
+import com.twilio.voice.RegistrationListener;
+import com.twilio.voice.Voice;
 
 import org.json.JSONObject;
 
@@ -26,25 +32,29 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import jp.mcinc.imesh.type.ipphone.R;
 import jp.mcinc.imesh.type.ipphone.activity.SplashScreen;
 import jp.mcinc.imesh.type.ipphone.activity.VoiceActivity;
 import jp.mcinc.imesh.type.ipphone.session.SessionManager;
+import jp.mcinc.imesh.type.ipphone.util.NetworkManager;
 
 import static jp.mcinc.imesh.type.ipphone.contants.Constants.ACCESS_TOKEN;
 import static jp.mcinc.imesh.type.ipphone.contants.Constants.CLIEENT_ID;
+import static jp.mcinc.imesh.type.ipphone.contants.Constants.GET_ACCESS_TOKEN_URL;
 import static jp.mcinc.imesh.type.ipphone.contants.Constants.ID_TOKEN;
 import static jp.mcinc.imesh.type.ipphone.contants.Constants.REFRESH_TOKEN_URL;
 
-public class BackgroundService extends Service {
+public class BackgroundService extends Service implements RegistrationListener {
     private String TAG = getClass().getSimpleName();
     private RequestQueue queue;
     private SessionManager sessionManager;
     private static Timer timer = new Timer ();
     private static TimerTask hourlyTask;
     public static final String CHANNEL_ID = "IPPhone Background Service";
+    private String mAccessToken;
 
     @Override
     public void onCreate() {
@@ -79,7 +89,7 @@ public class BackgroundService extends Service {
             }
         };
         // schedule the task to run starting now and then every hour 6000000 milliseconds
-        timer.schedule (hourlyTask, 0l, 1000 * 60 * 60);
+        timer.schedule (hourlyTask, 0l, 1000 * 60 * 6);
         return START_NOT_STICKY;
     }
 
@@ -111,6 +121,7 @@ public class BackgroundService extends Service {
                                 ID_TOKEN = response.getString("idToken");
                                 sessionManager.setAccessToken(ACCESS_TOKEN);
                                 sessionManager.setIdToken(ID_TOKEN);
+                                retrieveAccessToken();
                             } catch (Exception e) {
                                 Log.e(TAG, "onResponse: " + e.getMessage());
                             }
@@ -134,5 +145,68 @@ public class BackgroundService extends Service {
             Log.e(TAG, "refershToken: " + e.getMessage());
         }
     }
+    /*
+     * Get an access token from your Twilio access token server
+     */
+    private void retrieveAccessToken() {
+        if (NetworkManager.isConnectedToNet(this)) {
+            try {
+                queue = Volley.newRequestQueue(this);
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, GET_ACCESS_TOKEN_URL + sessionManager.getDeviceId(), new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            Log.e(TAG, "onResponse: Access token" + response.toString());
+                            mAccessToken = response.toString();
+                            sessionManager.setAccessToken(mAccessToken);
+                            registerForCallInvites();
+                        } catch (Exception e) {
+                            Log.e(TAG, "onResponse: " + e.getMessage());
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        mAccessToken = sessionManager.getAccessToken();
+                        Log.e(TAG, "Failed to get Access token: " + mAccessToken);
+                    }
+                }) {
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        HashMap<String, String> params = new HashMap<String, String>();
+                        params.put("Authorization", sessionManager.getIdToken());
+                        params.put("Content-Type", "application/json");
+                        params.put("accept", "text/html");
+                        return params;
+                    }
+                };
+                queue.add(stringRequest);
+            } catch (Exception e) {
+                Log.e(TAG, "retrieveAccessToken: " + e.getMessage());
+            }
+        } else {
+            Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show();
+        }
+    }
 
+    /*
+     * Register your FCM token with Twilio to receive incoming call invites
+     */
+    private void registerForCallInvites() {
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(instanceIdResult -> {
+            String fcmToken = instanceIdResult.getToken();
+            Log.i(TAG, "Registering with FCM");
+            Voice.register(mAccessToken, Voice.RegistrationChannel.FCM, fcmToken, BackgroundService.this);
+        });
+    }
+
+    @Override
+    public void onRegistered(@NonNull String accessToken, @NonNull String fcmToken) {
+        Log.e(TAG, "onRegistered: sucessfull");
+    }
+
+    @Override
+    public void onError(@NonNull RegistrationException registrationException, @NonNull String accessToken, @NonNull String fcmToken) {
+        Log.e(TAG, "onError: FCM Registeration");
+    }
 }

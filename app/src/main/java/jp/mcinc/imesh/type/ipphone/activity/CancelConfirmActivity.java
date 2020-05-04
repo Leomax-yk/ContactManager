@@ -117,7 +117,6 @@ public class CancelConfirmActivity extends AppCompatActivity {
                 //Up Key
                 if (cancelVisible) {
                     Log.e(TAG, "onKeyUp: VISIBLE MENU");
-                    deleteSelection = 0;
                     callDeleteMethod();
                 } else {
                     showCancel();
@@ -182,6 +181,7 @@ public class CancelConfirmActivity extends AppCompatActivity {
             finish();
         } else {
             showCancel();
+            finish();
         }
     }
 
