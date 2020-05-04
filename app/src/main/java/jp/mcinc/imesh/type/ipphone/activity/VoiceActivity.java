@@ -969,6 +969,12 @@ public class VoiceActivity extends AppCompatActivity {
                 //BACK
                 if (mEditNumber != null && mEditNumber.length() > 0) {
                     mEditNumber.setText("" + mEditNumber.getText().toString().substring(0, mEditNumber.length() - 1));
+                    mEditNumber.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mEditNumber.setSelection(mEditNumber.getText().length());
+                        }
+                    });
                 } else {
                     finish();
                 }
